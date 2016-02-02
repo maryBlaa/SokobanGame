@@ -29,9 +29,5 @@ public class SokobanRenderer implements android.opengl.GLSurfaceView.Renderer {
             gl.glClear(GL10.GL_COLOR_BUFFER_BIT);
             blink = !blink;
         }
-
-        System.currentTimeMillis();
-
-
     }
 }

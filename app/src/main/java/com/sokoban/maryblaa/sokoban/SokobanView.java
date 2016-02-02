@@ -2,19 +2,17 @@ package com.sokoban.maryblaa.sokoban;
 
 import android.content.Context;
 
-import com.sokoban.maryblaa.sokoban.graphics.SokobanRenderer;
-
 /**
  * Created by maryf on 02.02.2016.
  */
 public class SokobanView extends android.opengl.GLSurfaceView {
 
-    private SokobanRenderer renderer;
+    private SokobanGame renderer;
 
     public SokobanView(Context context) {
         super(context);
 
-        renderer = new SokobanRenderer();
+        renderer = new SokobanGame();
         setRenderer(renderer);
 
         setRenderMode(RENDERMODE_CONTINUOUSLY);
