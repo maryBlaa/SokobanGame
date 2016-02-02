@@ -8,6 +8,8 @@ import javax.microedition.khronos.opengles.GL10;
  */
 public class SokobanRenderer implements android.opengl.GLSurfaceView.Renderer {
 
+    private boolean blink = false;
+
     @Override
     public void onSurfaceCreated(GL10 gl, EGLConfig config) { // wird zu Beginn aufgerufen und dient somit als initalize-Methode in unserer Spielschleife
     }
@@ -18,6 +20,18 @@ public class SokobanRenderer implements android.opengl.GLSurfaceView.Renderer {
 
     @Override
     public void onDrawFrame(GL10 gl) { // wird immer dann aufgerufen wenn das Bild neu gezeichnet werden soll
+        if (blink) {
+            gl.glClearColor(0.0f, 0.5f, 1.0f, 1.0f);
+            gl.glClear(GL10.GL_COLOR_BUFFER_BIT);
+            blink = !blink;
+        } else {
+            gl.glClearColor(1.0f, 0.4f, 2.0f, 0.9f);
+            gl.glClear(GL10.GL_COLOR_BUFFER_BIT);
+            blink = !blink;
+        }
+
+        System.currentTimeMillis();
+
 
     }
 }
