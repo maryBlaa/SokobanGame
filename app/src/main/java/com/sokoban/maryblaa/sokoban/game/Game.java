@@ -3,13 +3,14 @@ package com.sokoban.maryblaa.sokoban.game;
 import android.content.Context;
 import android.opengl.GLSurfaceView.Renderer;
 
+import com.sokoban.maryblaa.sokoban.graphics.GraphicsDevice;
 import com.sokoban.maryblaa.sokoban.graphics.SokobanRenderer;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
 /**
- * Created by maryf on 02.02.2016.
+ * Created by maryBlaa on 02.02.2016.
  */
 public abstract class Game implements Renderer {
 
@@ -61,8 +62,11 @@ public abstract class Game implements Renderer {
 
             initialize();
             initialized = true;
+
+            loadContent();
         } else {
             graphicsDevice.onSurfaceCreated(gl);
+            loadContent();
         }
     }
 
@@ -73,5 +77,7 @@ public abstract class Game implements Renderer {
     public abstract void draw(float deltaSeconds);
 
     public abstract void resize(int width, int height);
+
+    public abstract void loadContent();
 
 }

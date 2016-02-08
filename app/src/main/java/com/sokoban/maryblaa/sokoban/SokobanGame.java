@@ -1,23 +1,30 @@
 package com.sokoban.maryblaa.sokoban;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.sokoban.maryblaa.sokoban.game.Game;
 import com.sokoban.maryblaa.sokoban.graphics.Camera;
+import com.sokoban.maryblaa.sokoban.graphics.Material;
 import com.sokoban.maryblaa.sokoban.graphics.Mesh;
+import com.sokoban.maryblaa.sokoban.graphics.Texture;
 import com.sokoban.maryblaa.sokoban.math.Matrix4x4;
 
 import java.io.IOException;
 import java.io.InputStream;
 
 /**
- * Created by maryf on 02.02.2016.
+ * Created by maryBlaa on 02.02.2016.
  */
 public class SokobanGame extends Game {
 
+    private static final String TAG = SokobanGame.class.getSimpleName();
     Camera camera;
     private Mesh cube;
     private Matrix4x4 world;
+
+    private Texture wood;
+    private Material matWood;
 
     public SokobanGame(Context contex) {
         super(contex);
@@ -35,10 +42,11 @@ public class SokobanGame extends Game {
         camera.setProjection(projection);
         camera.setView(view);
 
+        matWood = new Material();
+
         try {
             InputStream stream = context.getAssets().open("cube.obj");
             cube = Mesh.loadFromOBJ(stream);
-
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -53,9 +61,9 @@ public class SokobanGame extends Game {
 
     @Override
     public void draw(float deltaSeconds) {
-        graphicsDevice.clear(0.0f, 1.0f, 0.0f);
+        graphicsDevice.clear(0.0f, 0.5f, 1.0f, 1.0f, 1.0f);
         graphicsDevice.setCamera(camera);
-        renderer.drawMesh(cube, world);
+        renderer.drawMesh(cube, matWood, world);
     }
 
     @Override
@@ -66,5 +74,21 @@ public class SokobanGame extends Game {
         projection.setPerspectiveProjection(-aspect * 0.1f, aspect * 0.1f, -0.1f, 0.1f, 0.1f, 100f);
 
         camera.setProjection(projection);
+    }
+
+    @Override
+    public void loadContent() {
+
+        try {
+            InputStream stream;
+            stream = context.getAssets().open("wood.png");
+            wood = graphicsDevice.createTexture(stream);
+            matWood.setTexture(wood);
+
+        } catch (IOException e) {
+            Log.e(TAG, "" + e);
+        }
+
+
     }
 }

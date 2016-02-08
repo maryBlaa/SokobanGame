@@ -1,13 +1,12 @@
 package com.sokoban.maryblaa.sokoban.graphics;
 
-import com.sokoban.maryblaa.sokoban.game.GraphicsDevice;
 import com.sokoban.maryblaa.sokoban.math.Matrix4x4;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
 /**
- * Created by maryf on 02.02.2016.
+ * Created by maryBlaa on 02.02.2016.
  */
 public class SokobanRenderer implements android.opengl.GLSurfaceView.Renderer {
 
@@ -40,8 +39,10 @@ public class SokobanRenderer implements android.opengl.GLSurfaceView.Renderer {
         }
     }
 
-    public void drawMesh(Mesh mesh, Matrix4x4 world) {
+    public void drawMesh(Mesh mesh, Material material, Matrix4x4 world) {
         graphicsDevice.setWorldMatrix(world);
+
+        setupMaterial(material);
 
         VertexBuffer vertexBuffer = mesh.getVertexBuffer();
         graphicsDevice.bindVertexBuffer(vertexBuffer);
@@ -49,7 +50,27 @@ public class SokobanRenderer implements android.opengl.GLSurfaceView.Renderer {
         graphicsDevice.unbindVertexBuffer(vertexBuffer);
     }
 
+    private void setupMaterial(Material material) {
+        graphicsDevice.bindTexture(material.getTexture());
+        graphicsDevice.setTextureFilters(material.getTextureFilterMin(), material.getTextureFilterMag());
+        graphicsDevice.setTextureWrapMode(material.getTextureWrapModeU(), material.getTextureWrapModeV());
+        graphicsDevice.setTextureBlendMode(material.getTextureBlendMode());
+        graphicsDevice.setTextureBlendColor(material.getTextureBlendColor());
+
+        graphicsDevice.setMaterialColor(material.getMaterialColor());
+        graphicsDevice.setBlendFactors(material.getBlendSourceFactor(), material.getBlendDestFactor());
+
+        graphicsDevice.setCullSide(material.getCullSide());
+        graphicsDevice.setDepthTest(material.getDepthTestFunction());
+        graphicsDevice.setDepthWrite(material.getDepthWrite());
+        graphicsDevice.setAlphaTest(material.getAlphaTestFunction(), material.getAlphaTestValue());
+    }
+
     public GraphicsDevice getGraphicsDevice() {
         return graphicsDevice;
+    }
+
+    public void setGraphicsDevice(GraphicsDevice graphicsDevice) {
+        this.graphicsDevice = graphicsDevice;
     }
 }

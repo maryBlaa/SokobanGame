@@ -3,7 +3,7 @@ package com.sokoban.maryblaa.sokoban.graphics;
 import java.nio.ByteBuffer;
 
 /**
- * Created by maryf on 02.02.2016.
+ * Created by maryBlaa on 02.02.2016.
  */
 public class VertexBuffer {
 
