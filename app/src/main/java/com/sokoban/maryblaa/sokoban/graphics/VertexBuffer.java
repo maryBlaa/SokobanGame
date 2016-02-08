@@ -23,7 +23,7 @@ public class VertexBuffer {
         this.buffer = buffer;
     }
 
-    public int getCountVertices() {
+    public int getNumVertices() {
         return countVertices;
     }
 
@@ -34,4 +34,6 @@ public class VertexBuffer {
     public void setNumVertices(int countVertices) {
         this.countVertices = countVertices;
     }
+
+
 }

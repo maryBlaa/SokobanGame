@@ -12,7 +12,7 @@ public class SokobanView extends android.opengl.GLSurfaceView {
     public SokobanView(Context context) {
         super(context);
 
-        renderer = new SokobanGame();
+        renderer = new SokobanGame(context);
         setRenderer(renderer);
 
         setRenderMode(RENDERMODE_CONTINUOUSLY);

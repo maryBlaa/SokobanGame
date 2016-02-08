@@ -1,5 +1,8 @@
 package com.sokoban.maryblaa.sokoban.graphics;
 
+import com.sokoban.maryblaa.sokoban.game.GraphicsDevice;
+import com.sokoban.maryblaa.sokoban.math.Matrix4x4;
+
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
@@ -9,6 +12,12 @@ import javax.microedition.khronos.opengles.GL10;
 public class SokobanRenderer implements android.opengl.GLSurfaceView.Renderer {
 
     private boolean blink = false;
+
+    private GraphicsDevice graphicsDevice;
+
+    public SokobanRenderer(GraphicsDevice graphicsDevice) {
+        this.graphicsDevice = graphicsDevice;
+    }
 
     @Override
     public void onSurfaceCreated(GL10 gl, EGLConfig config) { // wird zu Beginn aufgerufen und dient somit als initalize-Methode in unserer Spielschleife
@@ -29,5 +38,18 @@ public class SokobanRenderer implements android.opengl.GLSurfaceView.Renderer {
             gl.glClear(GL10.GL_COLOR_BUFFER_BIT);
             blink = !blink;
         }
+    }
+
+    public void drawMesh(Mesh mesh, Matrix4x4 world) {
+        graphicsDevice.setWorldMatrix(world);
+
+        VertexBuffer vertexBuffer = mesh.getVertexBuffer();
+        graphicsDevice.bindVertexBuffer(vertexBuffer);
+        graphicsDevice.draw(mesh.getMode(), 0, vertexBuffer.getNumVertices());
+        graphicsDevice.unbindVertexBuffer(vertexBuffer);
+    }
+
+    public GraphicsDevice getGraphicsDevice() {
+        return graphicsDevice;
     }
 }

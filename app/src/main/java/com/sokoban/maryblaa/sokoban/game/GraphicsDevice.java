@@ -47,7 +47,7 @@ public class GraphicsDevice {
         gl.glMatrixMode(GL10.GL_MODELVIEW);
     }
 
-    void bindVertexBuffer(VertexBuffer vertexBuffer) {
+    public void bindVertexBuffer(VertexBuffer vertexBuffer) {
         ByteBuffer buffer = vertexBuffer.getBuffer();
 
         for (VertexElement element : vertexBuffer.getElements()) {
@@ -78,7 +78,7 @@ public class GraphicsDevice {
 
     }
 
-    void unbindVertexBuffer(VertexBuffer vertexBuffer) {
+    public void unbindVertexBuffer(VertexBuffer vertexBuffer) {
         for (VertexElement element : vertexBuffer.getElements()) {
             switch (element.getSemantic()) {
                 case VERTEX_ELEMENT_POSITION:
@@ -96,8 +96,12 @@ public class GraphicsDevice {
         }
     }
 
-    void draw(int mode, int first, int count) {
+    public void draw(int mode, int first, int count) {
         gl.glDrawArrays(mode, first, count);
+    }
+
+    public void setWorldMatrix(Matrix4x4 world) {
+        gl.glLoadMatrixf(world.m, 0);
     }
 
 }
