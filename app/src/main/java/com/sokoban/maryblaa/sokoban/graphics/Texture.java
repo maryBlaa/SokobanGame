@@ -5,25 +5,24 @@ package com.sokoban.maryblaa.sokoban.graphics;
  */
 public class Texture {
 
-    private int height;
-    private int width;
     private int handle;
+    private int width, height;
 
-    Texture(int height, int handle, int width) {
-        this.height = height;
+    Texture(int handle, int width, int height) {
         this.handle = handle;
         this.width = width;
+        this.height = height;
     }
 
-    public int getHeight() {
-        return height;
+    int getHandle() {
+        return handle;
     }
 
     public int getWidth() {
         return width;
     }
 
-    int getHandle() {
-        return handle;
+    public int getHeight() {
+        return height;
     }
 }

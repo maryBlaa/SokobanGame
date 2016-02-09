@@ -18,44 +18,16 @@ import javax.microedition.khronos.opengles.GL10;
  */
 public class GraphicsDevice {
 
-    GL10 gl;
+    private GL10 gl;
 
-    public void onSurfaceCreated(GL10 gl) {
-        this.gl = gl;
-        gl.glHint(GL10.GL_PERSPECTIVE_CORRECTION_HINT, GL10.GL_NICEST);
+    public void bindTexture(Texture texture) {
+        gl.glBindTexture(GL10.GL_TEXTURE_2D, texture.getHandle());
+        gl.glEnable(GL10.GL_TEXTURE_2D);
     }
 
-    public void clear(float red, float green, float blue, float alpha, float depth) {
-        gl.glClearColor(red, green, blue, alpha);
-        gl.glClearDepthf(depth);
-        gl.glClear(GL10.GL_COLOR_BUFFER_BIT | GL10.GL_DEPTH_BUFFER_BIT);
-    }
-
-    public void clear(float red, float green, float blue, float alpha) {
-        gl.glClearColor(red, green, blue, alpha);
-        gl.glClear(GL10.GL_COLOR_BUFFER_BIT);
-    }
-
-    public void clear(float red, float green, float blue) {
-        gl.glClearColor(red, green, blue, 1.0f);
-        gl.glClear(GL10.GL_COLOR_BUFFER_BIT);
-    }
-
-    public void resize(int width, int height) {
-        gl.glViewport(0, 0, width, height);
-    }
-
-    public void setCamera(Camera camera) {
-
-        Matrix4x4 projection = camera.getProjection();
-        Matrix4x4 view = camera.getView();
-
-        Matrix4x4 viewProjection = Matrix4x4.multiply(projection, view);
-
-
-        gl.glMatrixMode(GL10.GL_PROJECTION);
-        gl.glLoadMatrixf(viewProjection.m, 0);
-        gl.glMatrixMode(GL10.GL_MODELVIEW);
+    public void unbindTexture() {
+        gl.glBindTexture(GL10.GL_TEXTURE_2D, 0);
+        gl.glDisable(GL10.GL_TEXTURE_2D);
     }
 
     public void bindVertexBuffer(VertexBuffer vertexBuffer) {
@@ -86,7 +58,6 @@ public class GraphicsDevice {
                     break;
             }
         }
-
     }
 
     public void unbindVertexBuffer(VertexBuffer vertexBuffer) {
@@ -107,16 +78,8 @@ public class GraphicsDevice {
         }
     }
 
-    public void draw(int mode, int first, int count) {
-        gl.glDrawArrays(mode, first, count);
-    }
-
-    public void setWorldMatrix(Matrix4x4 world) {
-        gl.glLoadMatrixf(world.m, 0);
-    }
-
     public Texture createTexture(InputStream stream) {
-        Bitmap bitmap = BitmapFactory.decodeStream(stream); // lädt bilder in png oder jpeg Format
+        Bitmap bitmap = BitmapFactory.decodeStream(stream);
         if (bitmap == null)
             return null;
 
@@ -147,7 +110,7 @@ public class GraphicsDevice {
         while (width >= 1 && height >= 1) {
             GLUtils.texImage2D(GL10.GL_TEXTURE_2D, level, bitmap, 0);
 
-            if (height == 1 || width == 1)
+            if(height == 1 || width == 1)
                 break;
 
             level++;
@@ -160,14 +123,29 @@ public class GraphicsDevice {
         return texture;
     }
 
-    public void bindTexture(Texture texture) {
-        gl.glBindTexture(GL10.GL_TEXTURE_2D, texture.getHandle());
-        gl.glEnable(GL10.GL_TEXTURE_2D);
+    public void clear(float red, float green, float blue, float alpha, float depth)
+    {
+        gl.glClearColor(red, green, blue, alpha);
+        gl.glClearDepthf(depth);
+        gl.glClear(GL10.GL_COLOR_BUFFER_BIT | GL10.GL_DEPTH_BUFFER_BIT);
     }
 
-    public void unbindTexture() {
-        gl.glBindTexture(GL10.GL_TEXTURE_2D, 0);
-        gl.glDisable(GL10.GL_TEXTURE_2D);
+    public void clear(float red, float green, float blue, float alpha) {
+        gl.glClearColor(red, green, blue, alpha);
+        gl.glClear(GL10.GL_COLOR_BUFFER_BIT);
+    }
+
+    public void clear(float red, float green, float blue) {
+        gl.glClearColor(red, green, blue, 1.0f);
+        gl.glClear(GL10.GL_COLOR_BUFFER_BIT);
+    }
+
+    public void draw(int mode, int first, int count) {
+        gl.glDrawArrays(mode, first, count);
+    }
+
+    public void resize(int width, int height) {
+        gl.glViewport(0, 0, width, height);
     }
 
     public void setAlphaTest(CompareFunction func, float referenceValue) {
@@ -186,6 +164,14 @@ public class GraphicsDevice {
             gl.glEnable(GL10.GL_BLEND);
             gl.glBlendFunc(getGLConstant(srcFactor), getGLConstant(dstFactor));
         }
+    }
+
+    public void setCamera(Camera camera) {
+        Matrix4x4 viewProjection = Matrix4x4.multiply(camera.getProjection(), camera.getView());
+
+        gl.glMatrixMode(GL10.GL_PROJECTION);
+        gl.glLoadMatrixf(viewProjection.m, 0);
+        gl.glMatrixMode(GL10.GL_MODELVIEW);
     }
 
     public void setCullSide(Side side) {
@@ -223,7 +209,7 @@ public class GraphicsDevice {
     }
 
     public void setTextureBlendColor(float red, float green, float blue, float alpha) {
-        setTextureBlendColor(new float[]{red, green, blue, alpha});
+        setTextureBlendColor(new float[] {red, green, blue, alpha});
     }
 
     public void setTextureBlendMode(TextureBlendMode blendMode) {
@@ -240,115 +226,84 @@ public class GraphicsDevice {
         gl.glTexParameterx(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_WRAP_T, getGLConstant(wrapV));
     }
 
+    public void setWorldMatrix(Matrix4x4 world) {
+        gl.glLoadMatrixf(world.m, 0);
+    }
+
+    public void onSurfaceCreated(GL10 gl) {
+        this.gl = gl;
+
+        gl.glHint(GL10.GL_PERSPECTIVE_CORRECTION_HINT, GL10.GL_NICEST);
+    }
+
     private static int getGLConstant(BlendFactor blendFactor) {
         switch (blendFactor) {
-            case ZERO:
-                return GL10.GL_ZERO;
-            case ONE:
-                return GL10.GL_ONE;
-            case SRC_COLOR:
-                return GL10.GL_SRC_COLOR;
-            case ONE_MINUS_SRC_COLOR:
-                return GL10.GL_ONE_MINUS_SRC_COLOR;
-            case DST_COLOR:
-                return GL10.GL_DST_COLOR;
-            case ONE_MINUS_DST_COLOR:
-                return GL10.GL_ONE_MINUS_DST_COLOR;
-            case SRC_ALPHA:
-                return GL10.GL_SRC_ALPHA;
-            case ONE_MINUS_SRC_ALPHA:
-                return GL10.GL_ONE_MINUS_SRC_ALPHA;
-            case DST_ALPHA:
-                return GL10.GL_DST_ALPHA;
-            case ONE_MINUS_DST_ALPHA:
-                return GL10.GL_ONE_MINUS_DST_ALPHA;
-            default:
-                throw new InvalidParameterException("Unknown value.");
+            case ZERO: 						return GL10.GL_ZERO;
+            case ONE:						return GL10.GL_ONE;
+            case SRC_COLOR:					return GL10.GL_SRC_COLOR;
+            case ONE_MINUS_SRC_COLOR:		return GL10.GL_ONE_MINUS_SRC_COLOR;
+            case DST_COLOR:					return GL10.GL_DST_COLOR;
+            case ONE_MINUS_DST_COLOR:		return GL10.GL_ONE_MINUS_DST_COLOR;
+            case SRC_ALPHA:					return GL10.GL_SRC_ALPHA;
+            case ONE_MINUS_SRC_ALPHA:		return GL10.GL_ONE_MINUS_SRC_ALPHA;
+            case DST_ALPHA:					return GL10.GL_DST_ALPHA;
+            case ONE_MINUS_DST_ALPHA:		return GL10.GL_ONE_MINUS_DST_ALPHA;
+            default:						throw new InvalidParameterException("Unknown value.");
         }
     }
 
     private static int getGLConstant(CompareFunction func) {
         switch (func) {
-            case NEVER:
-                return GL10.GL_NEVER;
-            case ALWAYS:
-                return GL10.GL_ALWAYS;
-            case LESS:
-                return GL10.GL_LESS;
-            case LESS_OR_EQUAL:
-                return GL10.GL_LEQUAL;
-            case EQUAL:
-                return GL10.GL_EQUAL;
-            case GREATER_OR_EQUAL:
-                return GL10.GL_GEQUAL;
-            case GREATER:
-                return GL10.GL_GREATER;
-            case NOT_EQUAL:
-                return GL10.GL_NOTEQUAL;
-            default:
-                throw new InvalidParameterException("Unknown value.");
+            case NEVER:						return GL10.GL_NEVER;
+            case ALWAYS:					return GL10.GL_ALWAYS;
+            case LESS:						return GL10.GL_LESS;
+            case LESS_OR_EQUAL:				return GL10.GL_LEQUAL;
+            case EQUAL:						return GL10.GL_EQUAL;
+            case GREATER_OR_EQUAL:			return GL10.GL_GEQUAL;
+            case GREATER:					return GL10.GL_GREATER;
+            case NOT_EQUAL:					return GL10.GL_NOTEQUAL;
+            default:						throw new InvalidParameterException("Unknown value.");
         }
     }
 
     private static int getGLConstant(Side side) {
         switch (side) {
-            case NONE:
-                return 0;
-            case FRONT:
-                return GL10.GL_FRONT;
-            case BACK:
-                return GL10.GL_BACK;
-            case FRONT_AND_BACK:
-                return GL10.GL_FRONT_AND_BACK;
-            default:
-                throw new InvalidParameterException("Unknown value.");
+            case NONE:						return 0;
+            case FRONT:						return GL10.GL_FRONT;
+            case BACK:						return GL10.GL_BACK;
+            case FRONT_AND_BACK:			return GL10.GL_FRONT_AND_BACK;
+            default:						throw new InvalidParameterException("Unknown value.");
         }
     }
 
     private static int getGLConstant(TextureBlendMode blendMode) {
         switch (blendMode) {
-            case REPLACE:
-                return GL10.GL_REPLACE;
-            case MODULATE:
-                return GL10.GL_MODULATE;
-            case DECAL:
-                return GL10.GL_DECAL;
-            case BLEND:
-                return GL10.GL_BLEND;
-            case ADD:
-                return GL10.GL_ADD;
-            default:
-                throw new InvalidParameterException("Unknown value.");
+            case REPLACE:					return GL10.GL_REPLACE;
+            case MODULATE:					return GL10.GL_MODULATE;
+            case DECAL:						return GL10.GL_DECAL;
+            case BLEND:						return GL10.GL_BLEND;
+            case ADD:						return GL10.GL_ADD;
+            default:						throw new InvalidParameterException("Unknown value.");
         }
     }
 
     private static int getGLConstant(TextureFilter filter) {
         switch (filter) {
-            case NEAREST:
-                return GL10.GL_NEAREST;
-            case NEAREST_MIPMAP_NEAREST:
-                return GL10.GL_NEAREST_MIPMAP_NEAREST;
-            case NEAREST_MIPMAP_LINEAR:
-                return GL10.GL_NEAREST_MIPMAP_LINEAR;
-            case LINEAR:
-                return GL10.GL_LINEAR;
-            case LINEAR_MIPMAP_NEAREST:
-                return GL10.GL_LINEAR_MIPMAP_NEAREST;
-            case LINEAR_MIPMAP_LINEAR:
-                return GL10.GL_LINEAR_MIPMAP_LINEAR;
-            default:
-                throw new InvalidParameterException("Unknown value.");
+            case NEAREST:					return GL10.GL_NEAREST;
+            case NEAREST_MIPMAP_NEAREST:	return GL10.GL_NEAREST_MIPMAP_NEAREST;
+            case NEAREST_MIPMAP_LINEAR:		return GL10.GL_NEAREST_MIPMAP_LINEAR;
+            case LINEAR:					return GL10.GL_LINEAR;
+            case LINEAR_MIPMAP_NEAREST:		return GL10.GL_LINEAR_MIPMAP_NEAREST;
+            case LINEAR_MIPMAP_LINEAR:		return GL10.GL_LINEAR_MIPMAP_LINEAR;
+            default:						throw new InvalidParameterException("Unknown value.");
         }
     }
 
     private static int getGLConstant(TextureWrapMode wrapMode) {
         switch (wrapMode) {
-            case CLAMP:
-                return GL10.GL_CLAMP_TO_EDGE;
-            case REPEAT:
-                return GL10.GL_REPEAT;
-            default:
-                throw new InvalidParameterException("Unknown value.");
+            case CLAMP:						return GL10.GL_CLAMP_TO_EDGE;
+            case REPEAT:					return GL10.GL_REPEAT;
+            default:						throw new InvalidParameterException("Unknown value.");
         }
     }
 

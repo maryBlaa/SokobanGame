@@ -21,8 +21,8 @@ public abstract class Game implements Renderer {
     protected GraphicsDevice graphicsDevice;
     protected SokobanRenderer renderer;
 
-    public Game(Context contex) {
-        this.context = contex;
+    public Game(Context context) {
+        this.context = context;
     }
 
     public void onDrawFrame(GL10 gl) {
@@ -60,7 +60,6 @@ public abstract class Game implements Renderer {
     }
 
     public abstract void initialize();
-
     public abstract void loadContent();
     public abstract void update(float deltaSeconds);
     public abstract void draw(float deltaSeconds);

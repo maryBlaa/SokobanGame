@@ -1,6 +1,18 @@
 package com.sokoban.maryblaa.sokoban.graphics;
 
+import android.util.Log;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.security.InvalidParameterException;
+import java.util.StringTokenizer;
+import java.util.Vector;
+
+import javax.microedition.khronos.opengles.GL10;
 
 /**
  * Created by maryBlaa on 08.02.2016.
@@ -24,6 +36,7 @@ public class Material {
     private float alphaTestValue;
 
     public Material() {
+        Log.i("", "Meterial() Material");
         texture = null;
 
         texFilterMin = TextureFilter.LINEAR;
@@ -31,9 +44,9 @@ public class Material {
         texWrapU = TextureWrapMode.REPEAT;
         texWrapV = TextureWrapMode.REPEAT;
         texBlendMode = TextureBlendMode.MODULATE;
-        texBlendColor = new float[]{0.0f, 0.0f, 0.0f, 0.0f};
+        texBlendColor = new float[] {0.0f, 0.0f, 0.0f, 0.0f};
 
-        colorMaterial = new float[]{1.0f, 1.0f, 1.0f, 1.0f};
+        colorMaterial = new float[] {1.0f, 1.0f, 1.0f, 1.0f};
         blendSrcFactor = BlendFactor.ONE;
         blendDstFactor = BlendFactor.ZERO;
 
@@ -105,6 +118,7 @@ public class Material {
     }
 
     public void setTexture(Texture texture) {
+        Log.i("", "setTexture() Material");
         this.texture = texture;
     }
 

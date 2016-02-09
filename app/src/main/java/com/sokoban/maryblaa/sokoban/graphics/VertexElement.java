@@ -5,6 +5,13 @@ package com.sokoban.maryblaa.sokoban.graphics;
  */
 public class VertexElement {
 
+    public enum VertexSemantic {
+        VERTEX_ELEMENT_NONE,
+        VERTEX_ELEMENT_POSITION,
+        VERTEX_ELEMENT_COLOR,
+        VERTEX_ELEMENT_TEXCOORD
+    };
+
     private int offset;
     private int stride;
     private int type;
@@ -18,15 +25,6 @@ public class VertexElement {
         this.count = count;
         this.semantic = semantic;
     }
-
-    public enum VertexSemantic {
-        VERTEX_ELEMENT_NONE,
-        VERTEX_ELEMENT_POSITION,
-        VERTEX_ELEMENT_COLOR,
-        VERTEX_ELEMENT_TEXCOORD
-    }
-
-    ;
 
     public int getOffset() {
         return offset;

@@ -14,7 +14,7 @@ import javax.microedition.khronos.opengles.GL10;
 /**
  * Created by maryBlaa on 02.02.2016.
  */
-public class MeshFile {
+public class Mesh {
 
     private int mode;
     private VertexBuffer vertexBuffer;
@@ -27,7 +27,7 @@ public class MeshFile {
         return vertexBuffer;
     }
 
-    public static MeshFile loadFromOBJ(InputStream stream) throws IOException {
+    public static Mesh loadFromOBJ(InputStream stream) throws IOException {
         Vector<float[]> positions = null;
         Vector<float[]> texCoords = null;
         Vector<short[]> indexGroups = null;
@@ -161,7 +161,7 @@ public class MeshFile {
         vertexBuffer.setNumVertices(indexGroups.size());
 
 
-        MeshFile mesh = new MeshFile();
+        Mesh mesh = new Mesh();
         mesh.vertexBuffer = vertexBuffer;
         mesh.mode = GL10.GL_TRIANGLES;
 

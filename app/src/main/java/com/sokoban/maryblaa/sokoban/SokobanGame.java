@@ -6,9 +6,9 @@ import android.util.Log;
 import com.sokoban.maryblaa.sokoban.game.Game;
 import com.sokoban.maryblaa.sokoban.graphics.Camera;
 import com.sokoban.maryblaa.sokoban.graphics.CompareFunction;
-import com.sokoban.maryblaa.sokoban.graphics.Material;
-import com.sokoban.maryblaa.sokoban.graphics.MeshFile;
 import com.sokoban.maryblaa.sokoban.graphics.Texture;
+import com.sokoban.maryblaa.sokoban.graphics.Material;
+import com.sokoban.maryblaa.sokoban.graphics.Mesh;
 import com.sokoban.maryblaa.sokoban.math.Matrix4x4;
 
 import java.io.IOException;
@@ -19,21 +19,20 @@ import java.io.InputStream;
  */
 public class SokobanGame extends Game {
 
-    private static final String TAG = SokobanGame.class.getSimpleName();
-
     private Camera camera;
-    private MeshFile meshTree, meshRoad;
+    private Mesh meshTree, meshRoad;
     private Texture texTree, texRoad;
     private Material matTree, matRoad;
     private Matrix4x4 worldRoad;
     private Matrix4x4[] worldTrees;
 
-    public SokobanGame(Context contex) {
-        super(contex);
+    public SokobanGame(Context context) {
+        super(context);
     }
 
     @Override
     public void initialize() {
+        Log.i("", "initialize() SokobanGame");
         Matrix4x4 projection = new Matrix4x4();
         Matrix4x4 view = new Matrix4x4();
 
@@ -50,7 +49,7 @@ public class SokobanGame extends Game {
 
         matRoad = new Material();
 
-        worldTrees = new Matrix4x4[]{
+        worldTrees = new Matrix4x4[] {
                 Matrix4x4.multiply(Matrix4x4.createTranslation(-1.2f, 0, -1), Matrix4x4.createRotationY(-20)),
                 Matrix4x4.multiply(Matrix4x4.createTranslation(-1.2f, 0, -3), Matrix4x4.createRotationY(45)),
                 Matrix4x4.multiply(Matrix4x4.createTranslation(-1.2f, 0, -5), Matrix4x4.createRotationY(-30)),
@@ -67,32 +66,31 @@ public class SokobanGame extends Game {
 
     @Override
     public void loadContent() {
-
+        Log.i("", "loadContent() SokobanGame");
         try {
             InputStream stream;
 
             stream = context.getAssets().open("tree.obj");
-            meshTree = MeshFile.loadFromOBJ(stream);
+            meshTree = Mesh.loadFromOBJ(stream);
 
             stream = context.getAssets().open("tree.png");
             texTree = graphicsDevice.createTexture(stream);
             matTree.setTexture(texTree);
 
             stream = context.getAssets().open("road.obj");
-            meshRoad = MeshFile.loadFromOBJ(stream);
+            meshRoad = Mesh.loadFromOBJ(stream);
 
             stream = context.getAssets().open("road.png");
             texRoad = graphicsDevice.createTexture(stream);
             matRoad.setTexture(texRoad);
-
         } catch (IOException e) {
-            Log.e(TAG, "" + e);
+            // TODO Auto-generated catch block
+            e.printStackTrace();
         }
     }
 
     @Override
     public void update(float deltaSeconds) {
-//        world.rotateY(deltaSeconds * 45);
     }
 
     @Override
@@ -104,7 +102,7 @@ public class SokobanGame extends Game {
         // Strasse zeichnen
         renderer.drawMesh(meshRoad, matRoad, worldRoad);
 
-        // Bäume zeichnen
+        // Bauume zeichnen
         for (Matrix4x4 worldTree : worldTrees)
             renderer.drawMesh(meshTree, matTree, worldTree);
     }
@@ -117,8 +115,6 @@ public class SokobanGame extends Game {
         projection.setPerspectiveProjection(-aspect * 0.1f, aspect * 0.1f, -0.1f, 0.1f, 0.1f, 100f);
 
         camera.setProjection(projection);
-        ;
     }
-
 
 }

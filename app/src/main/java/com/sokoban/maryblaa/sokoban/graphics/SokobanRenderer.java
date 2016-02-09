@@ -13,7 +13,7 @@ public class SokobanRenderer {
         this.graphicsDevice = graphicsDevice;
     }
 
-    public void drawMesh(MeshFile mesh, Material material, Matrix4x4 world) {
+    public void drawMesh(Mesh mesh, Material material, Matrix4x4 world) {
         graphicsDevice.setWorldMatrix(world);
 
         setupMaterial(material);

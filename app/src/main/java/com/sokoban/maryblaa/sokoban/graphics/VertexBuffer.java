@@ -7,32 +7,29 @@ import java.nio.ByteBuffer;
  */
 public class VertexBuffer {
 
-    ByteBuffer buffer;
+    private int numVertices;
     private VertexElement[] elements;
-    int countVertices;
+    private ByteBuffer buffer;
 
-    public ByteBuffer getBuffer() {
-        return buffer;
+
+
+    public int getNumVertices() {
+        return numVertices;
     }
-
     public VertexElement[] getElements() {
         return elements;
     }
-
-    public void setBuffer(ByteBuffer buffer) {
-        this.buffer = buffer;
+    public ByteBuffer getBuffer() {
+        return buffer;
     }
-
-    public int getNumVertices() {
-        return countVertices;
+    public void setNumVertices(int numVertices) {
+        this.numVertices = numVertices;
     }
-
     public void setElements(VertexElement[] elements) {
         this.elements = elements;
     }
-
-    public void setNumVertices(int countVertices) {
-        this.countVertices = countVertices;
+    public void setBuffer(ByteBuffer buffer) {
+        this.buffer = buffer;
     }
 
 
