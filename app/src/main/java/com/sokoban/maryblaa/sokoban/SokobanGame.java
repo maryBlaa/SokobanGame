@@ -6,9 +6,9 @@ import android.util.Log;
 import com.sokoban.maryblaa.sokoban.game.Game;
 import com.sokoban.maryblaa.sokoban.graphics.Camera;
 import com.sokoban.maryblaa.sokoban.graphics.CompareFunction;
-import com.sokoban.maryblaa.sokoban.graphics.Texture;
 import com.sokoban.maryblaa.sokoban.graphics.Material;
 import com.sokoban.maryblaa.sokoban.graphics.Mesh;
+import com.sokoban.maryblaa.sokoban.graphics.Texture;
 import com.sokoban.maryblaa.sokoban.math.Matrix4x4;
 
 import java.io.IOException;
@@ -21,9 +21,13 @@ public class SokobanGame extends Game {
 
     private Camera camera;
     private Mesh meshTree, meshRoad;
+    private Mesh cubeMesh;
     private Texture texTree, texRoad;
+    private Texture cubeTex;
     private Material matTree, matRoad;
+    private Material matCube;
     private Matrix4x4 worldRoad;
+    private Matrix4x4 worldCube;
     private Matrix4x4[] worldTrees;
 
     public SokobanGame(Context context) {
@@ -37,7 +41,7 @@ public class SokobanGame extends Game {
         Matrix4x4 view = new Matrix4x4();
 
         projection.setPerspectiveProjection(-0.1f, 0.1f, -0.1f, 0.1f, 0.1f, 100f);
-        view.translate(0, -1, 0);
+        view.translate(0, 0, -5);
 
         camera = new Camera();
         camera.setProjection(projection);
@@ -48,6 +52,7 @@ public class SokobanGame extends Game {
         matTree.setAlphaTestValue(0.9f);
 
         matRoad = new Material();
+        matCube = new Material();
 
         worldTrees = new Matrix4x4[] {
                 Matrix4x4.multiply(Matrix4x4.createTranslation(-1.2f, 0, -1), Matrix4x4.createRotationY(-20)),
@@ -62,6 +67,8 @@ public class SokobanGame extends Game {
 
         worldRoad = new Matrix4x4();
         worldRoad.translate(0, 0, 1);
+
+        worldCube = new Matrix4x4();
     }
 
     @Override
@@ -69,6 +76,13 @@ public class SokobanGame extends Game {
         Log.i("", "loadContent() SokobanGame");
         try {
             InputStream stream;
+
+            stream = context.getAssets().open("box.obj");
+            cubeMesh = Mesh.loadFromOBJ(stream);
+
+            stream = context.getAssets().open("wood.png");
+            cubeTex = graphicsDevice.createTexture(stream);
+            matCube.setTexture(cubeTex);
 
             stream = context.getAssets().open("tree.obj");
             meshTree = Mesh.loadFromOBJ(stream);
@@ -101,6 +115,8 @@ public class SokobanGame extends Game {
 
         // Strasse zeichnen
         renderer.drawMesh(meshRoad, matRoad, worldRoad);
+
+        renderer.drawMesh(cubeMesh, matCube, worldCube);
 
         // Bauume zeichnen
         for (Matrix4x4 worldTree : worldTrees)
