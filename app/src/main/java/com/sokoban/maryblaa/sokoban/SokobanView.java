@@ -7,13 +7,13 @@ import android.content.Context;
  */
 public class SokobanView extends android.opengl.GLSurfaceView {
 
-    private SokobanGame renderer;
+    private SokobanGame game;
 
     public SokobanView(Context context) {
         super(context);
 
-        renderer = new SokobanGame(context);
-        setRenderer(renderer);
+        game = new SokobanGame(context);
+        setRenderer(game);
 
         setRenderMode(RENDERMODE_CONTINUOUSLY);
 

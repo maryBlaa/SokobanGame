@@ -16,11 +16,10 @@ public abstract class Game implements Renderer {
 
     private boolean initialized;
     private long lastTime;
-    protected GraphicsDevice graphicsDevice;
-    protected Context context;
-    protected SokobanRenderer renderer;
 
-    private boolean blink = false;
+    protected Context context;
+    protected GraphicsDevice graphicsDevice;
+    protected SokobanRenderer renderer;
 
     public Game(Context contex) {
         this.context = contex;
@@ -34,16 +33,6 @@ public abstract class Game implements Renderer {
         draw(deltaSeconds);
 
         lastTime = currTime;
-
-//        if (blink) {
-//            gl.glClearColor(0.0f, 0.5f, 1.0f, 1.0f);
-//            gl.glClear(GL10.GL_COLOR_BUFFER_BIT);
-//            blink = !blink;
-//        } else {
-//            gl.glClearColor(1.0f, 0.4f, 2.0f, 0.9f);
-//            gl.glClear(GL10.GL_COLOR_BUFFER_BIT);
-//            blink = !blink;
-//        }
     }
 
     public void onSurfaceChanged(GL10 gl, int width, int height) {
@@ -72,12 +61,9 @@ public abstract class Game implements Renderer {
 
     public abstract void initialize();
 
-    public abstract void update(float deltaSeconds);
-
-    public abstract void draw(float deltaSeconds);
-
-    public abstract void resize(int width, int height);
-
     public abstract void loadContent();
+    public abstract void update(float deltaSeconds);
+    public abstract void draw(float deltaSeconds);
+    public abstract void resize(int width, int height);
 
 }

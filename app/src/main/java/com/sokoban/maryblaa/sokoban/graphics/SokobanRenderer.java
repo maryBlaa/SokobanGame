@@ -2,15 +2,10 @@ package com.sokoban.maryblaa.sokoban.graphics;
 
 import com.sokoban.maryblaa.sokoban.math.Matrix4x4;
 
-import javax.microedition.khronos.egl.EGLConfig;
-import javax.microedition.khronos.opengles.GL10;
-
 /**
  * Created by maryBlaa on 02.02.2016.
  */
-public class SokobanRenderer implements android.opengl.GLSurfaceView.Renderer {
-
-    private boolean blink = false;
+public class SokobanRenderer {
 
     private GraphicsDevice graphicsDevice;
 
@@ -18,28 +13,7 @@ public class SokobanRenderer implements android.opengl.GLSurfaceView.Renderer {
         this.graphicsDevice = graphicsDevice;
     }
 
-    @Override
-    public void onSurfaceCreated(GL10 gl, EGLConfig config) { // wird zu Beginn aufgerufen und dient somit als initalize-Methode in unserer Spielschleife
-    }
-
-    @Override
-    public void onSurfaceChanged(GL10 gl, int width, int height) { // wird aufgerufen wenn sich die Größe bzw. Auflösung der Surface ändert. Dies passiert z.B. wenn das Gerät gedreht wird
-    }
-
-    @Override
-    public void onDrawFrame(GL10 gl) { // wird immer dann aufgerufen wenn das Bild neu gezeichnet werden soll
-        if (blink) {
-            gl.glClearColor(0.0f, 0.5f, 1.0f, 1.0f);
-            gl.glClear(GL10.GL_COLOR_BUFFER_BIT);
-            blink = !blink;
-        } else {
-            gl.glClearColor(1.0f, 0.4f, 2.0f, 0.9f);
-            gl.glClear(GL10.GL_COLOR_BUFFER_BIT);
-            blink = !blink;
-        }
-    }
-
-    public void drawMesh(Mesh mesh, Material material, Matrix4x4 world) {
+    public void drawMesh(MeshFile mesh, Material material, Matrix4x4 world) {
         graphicsDevice.setWorldMatrix(world);
 
         setupMaterial(material);
@@ -48,6 +22,10 @@ public class SokobanRenderer implements android.opengl.GLSurfaceView.Renderer {
         graphicsDevice.bindVertexBuffer(vertexBuffer);
         graphicsDevice.draw(mesh.getMode(), 0, vertexBuffer.getNumVertices());
         graphicsDevice.unbindVertexBuffer(vertexBuffer);
+    }
+
+    public GraphicsDevice getGraphicsDevice() {
+        return graphicsDevice;
     }
 
     private void setupMaterial(Material material) {
@@ -64,13 +42,5 @@ public class SokobanRenderer implements android.opengl.GLSurfaceView.Renderer {
         graphicsDevice.setDepthTest(material.getDepthTestFunction());
         graphicsDevice.setDepthWrite(material.getDepthWrite());
         graphicsDevice.setAlphaTest(material.getAlphaTestFunction(), material.getAlphaTestValue());
-    }
-
-    public GraphicsDevice getGraphicsDevice() {
-        return graphicsDevice;
-    }
-
-    public void setGraphicsDevice(GraphicsDevice graphicsDevice) {
-        this.graphicsDevice = graphicsDevice;
     }
 }

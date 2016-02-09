@@ -165,7 +165,7 @@ public class GraphicsDevice {
         gl.glEnable(GL10.GL_TEXTURE_2D);
     }
 
-    public void undbindTexture() {
+    public void unbindTexture() {
         gl.glBindTexture(GL10.GL_TEXTURE_2D, 0);
         gl.glDisable(GL10.GL_TEXTURE_2D);
     }
