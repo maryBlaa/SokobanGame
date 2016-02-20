@@ -19,6 +19,14 @@ public class Mesh {
     private int mode;
     private VertexBuffer vertexBuffer;
 
+    public Mesh() {
+    }
+
+    public Mesh(VertexBuffer vertexBuffer, int mode) {
+        this.vertexBuffer = vertexBuffer;
+        this.mode = mode;
+    }
+
     public int getMode() {
         return mode;
     }

@@ -24,6 +24,11 @@ public class SokobanRenderer {
         graphicsDevice.unbindVertexBuffer(vertexBuffer);
     }
 
+    public void drawText(TextBuffer textBuffer, Matrix4x4 position) {
+        Mesh mesh = textBuffer.getMesh();
+        drawMesh(mesh, textBuffer.getSpriteFont().getMaterial(), position);
+    }
+
     public GraphicsDevice getGraphicsDevice() {
         return graphicsDevice;
     }

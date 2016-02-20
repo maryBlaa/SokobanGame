@@ -3,6 +3,7 @@ package com.sokoban.maryblaa.sokoban.graphics;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
+import android.graphics.Typeface;
 import android.opengl.GLUtils;
 
 import com.sokoban.maryblaa.sokoban.math.Matrix4x4;
@@ -209,7 +210,7 @@ public class GraphicsDevice {
     }
 
     public void setTextureBlendColor(float red, float green, float blue, float alpha) {
-        setTextureBlendColor(new float[] {red, green, blue, alpha});
+        setTextureBlendColor(new float[]{red, green, blue, alpha});
     }
 
     public void setTextureBlendMode(TextureBlendMode blendMode) {
@@ -234,6 +235,14 @@ public class GraphicsDevice {
         this.gl = gl;
 
         gl.glHint(GL10.GL_PERSPECTIVE_CORRECTION_HINT, GL10.GL_NICEST);
+    }
+
+    public SpriteFont createSpriteFont(Typeface typeface, float size) {
+        return new SpriteFont(this, typeface, size);
+    }
+
+    public TextBuffer createTextBuffer(SpriteFont spriteFont, int capacity) {
+        return new TextBuffer(this, spriteFont, capacity);
     }
 
     private static int getGLConstant(BlendFactor blendFactor) {
