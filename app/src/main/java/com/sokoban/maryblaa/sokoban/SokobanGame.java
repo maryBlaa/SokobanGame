@@ -1,7 +1,8 @@
 package com.sokoban.maryblaa.sokoban;
 
-import android.content.Context;
-import android.graphics.Typeface;
+import android.util.Log;
+import android.view.KeyEvent;
+import android.view.View;
 
 import com.sokoban.maryblaa.sokoban.game.Game;
 import com.sokoban.maryblaa.sokoban.graphics.Camera;
@@ -11,6 +12,7 @@ import com.sokoban.maryblaa.sokoban.graphics.Mesh;
 import com.sokoban.maryblaa.sokoban.graphics.SpriteFont;
 import com.sokoban.maryblaa.sokoban.graphics.TextBuffer;
 import com.sokoban.maryblaa.sokoban.graphics.Texture;
+import com.sokoban.maryblaa.sokoban.input.InputEvent;
 import com.sokoban.maryblaa.sokoban.math.Matrix4x4;
 
 import java.io.IOException;
@@ -21,6 +23,8 @@ import java.io.InputStream;
  */
 public class SokobanGame extends Game {
 
+    public static final String TAG = SokobanGame.class.getSimpleName();
+
     private Camera hudCamera, sceneCamera;
     private Mesh meshTree, meshRoad;
     private Texture texTree, texRoad;
@@ -28,13 +32,15 @@ public class SokobanGame extends Game {
     private Matrix4x4 worldRoad;
     private Matrix4x4[] worldTrees;
 
-    private SpriteFont font;
-    private TextBuffer text;
-    private TextBuffer hudText;
-    private Matrix4x4 hudMatr, worldText;
+    private SpriteFont fontTitle, fontMenu;
+    private TextBuffer textTitle;
+    private Matrix4x4 matTitle;
+    private TextBuffer[] textMenu;
+    private Matrix4x4[] matMenu;
+    private boolean showMenu;
 
-    public SokobanGame(Context context) {
-        super(context);
+    public SokobanGame(View view) {
+        super(view);
     }
 
     @Override
@@ -76,24 +82,10 @@ public class SokobanGame extends Game {
 
         worldRoad = new Matrix4x4();
         worldRoad.translate(0, 0, 1);
-
-        hudMatr = new Matrix4x4();
-
-        worldText = new Matrix4x4();
-        worldText.translate(-0.75f, 0, -1);
-        worldText.scale(0.05f); // textgröße
-        worldText.rotateY(90);
     }
 
     @Override
     public void loadContent() {
-        font = graphicsDevice.createSpriteFont(Typeface.DEFAULT, 16);
-        text = graphicsDevice.createTextBuffer(font, 128);
-        text.setText("Hallo, Welt!");
-
-        hudText = graphicsDevice.createTextBuffer(font, 128);
-        hudText.setText("Testspieler");
-
         try {
             InputStream stream;
 
@@ -114,10 +106,70 @@ public class SokobanGame extends Game {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
+
+        fontTitle = graphicsDevice.createSpriteFont(null, 64);
+        fontMenu = graphicsDevice.createSpriteFont(null, 20);
+
+        textTitle = graphicsDevice.createTextBuffer(fontTitle, 16);
+        textMenu = new TextBuffer[]{
+                graphicsDevice.createTextBuffer(fontMenu, 16),
+                graphicsDevice.createTextBuffer(fontMenu, 16),
+                graphicsDevice.createTextBuffer(fontMenu, 16),
+                graphicsDevice.createTextBuffer(fontMenu, 16)
+        };
+
+        textTitle.setText("DrivingSim");
+        textMenu[0].setText("Start Game");
+        textMenu[1].setText("Options");
+        textMenu[2].setText("Credits");
+        textMenu[3].setText("Quit");
+
+        matTitle = Matrix4x4.createTranslation(-120, 100, 0);
+        matMenu = new Matrix4x4[]{
+                Matrix4x4.createTranslation(0, -50, 0),
+                Matrix4x4.createTranslation(0, -80, 0),
+                Matrix4x4.createTranslation(0, -110, 0),
+                Matrix4x4.createTranslation(0, -140, 0)
+        };
     }
 
     @Override
     public void update(float deltaSeconds) {
+        InputEvent inputEvent = inputSystem.peekEvent();
+        while (inputEvent != null) {
+
+            switch (inputEvent.getDevice()) {
+                case KEYBOARD:
+                    Log.d(TAG, "KEYBOARD");
+                    Log.d(TAG, "" + inputEvent.getAction().toString());
+                    switch (inputEvent.getAction()) {
+
+                        case DOWN:
+                            switch (inputEvent.getKeycode()) {
+                                case KeyEvent.KEYCODE_MENU:
+                                    showMenu = !showMenu;
+                                    break;
+                            }
+                            break;
+                    }
+                    Log.d(TAG, "" + inputEvent.getDevice());
+                    break;
+                case ROTATION:
+//                    Log.d(TAG, "ROTATION");
+                    break;
+                case TOUCHSCREEN:
+                    Log.d(TAG, "" + inputEvent.getAction().toString());
+                    switch (inputEvent.getAction()) {
+                        case DOWN:
+                            showMenu = !showMenu;
+                            break;
+                    }
+                    break;
+            }
+
+            inputSystem.popEvent();
+            inputEvent = inputSystem.peekEvent();
+        }
     }
 
     @Override
@@ -126,19 +178,22 @@ public class SokobanGame extends Game {
 
         graphicsDevice.setCamera(sceneCamera);
 
-        // Strasse zeichnen
-        renderer.drawMesh(meshRoad, matRoad, worldRoad);
+        if (!showMenu) {
+            // Text auf dem HUD zeichnen
+            graphicsDevice.setCamera(hudCamera);
+            renderer.drawText(textTitle, matTitle);
 
-        // Bäume zeichnen
-        for (Matrix4x4 worldTree : worldTrees)
-            renderer.drawMesh(meshTree, matTree, worldTree);
+            for (int i = 0; i < textMenu.length; ++i)
+                renderer.drawText(textMenu[i], matMenu[i]);
+        } else {
+            // Strasse zeichnen
+            renderer.drawMesh(meshRoad, matRoad, worldRoad);
 
-        // Text in 3D zeichnen
-        renderer.drawText(text, worldText);
+            // Bäume zeichnen
+            for (Matrix4x4 worldTree : worldTrees)
+                renderer.drawMesh(meshTree, matTree, worldTree);
 
-        // Text auf dem HUD zeichnen
-        graphicsDevice.setCamera(hudCamera);
-        renderer.drawText(hudText, hudMatr);
+        }
     }
 
     @Override
@@ -154,8 +209,7 @@ public class SokobanGame extends Game {
         projection.setPerspectiveProjection(-0.1f * aspect, 0.1f * aspect, -0.1f, 0.1f, 0.1f, 100.0f);
         sceneCamera.setProjection(projection);
 
-        hudMatr.translate(-width / 50, height / 2 - 80, 0); // wie weit nach rechts, wie hoch von oben weg, ...
+        matTitle.setIdentity();
+        matTitle.translate(-width / 2, height / 2 - 64, 0);
     }
-
-
 }

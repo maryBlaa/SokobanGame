@@ -2,9 +2,11 @@ package com.sokoban.maryblaa.sokoban.game;
 
 import android.content.Context;
 import android.opengl.GLSurfaceView.Renderer;
+import android.view.View;
 
 import com.sokoban.maryblaa.sokoban.graphics.GraphicsDevice;
 import com.sokoban.maryblaa.sokoban.graphics.SokobanRenderer;
+import com.sokoban.maryblaa.sokoban.input.InputSystem;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
@@ -17,12 +19,18 @@ public abstract class Game implements Renderer {
     private boolean initialized;
     private long lastTime;
 
+    protected View view;
     protected Context context;
     protected GraphicsDevice graphicsDevice;
     protected SokobanRenderer renderer;
+    protected InputSystem inputSystem;
 
-    public Game(Context context) {
-        this.context = context;
+    public Game(View view) {
+        this.view = view;
+        this.context = view.getContext();
+
+        inputSystem = new InputSystem(view);
+
     }
 
     public void onDrawFrame(GL10 gl) {
