@@ -107,29 +107,31 @@ public class SokobanGame extends Game {
             e.printStackTrace();
         }
 
-        fontTitle = graphicsDevice.createSpriteFont(null, 64);
-        fontMenu = graphicsDevice.createSpriteFont(null, 20);
+        fontTitle = graphicsDevice.createSpriteFont(null, 150);
+        fontMenu = graphicsDevice.createSpriteFont(null, 90);
 
-        textTitle = graphicsDevice.createTextBuffer(fontTitle, 16);
+        textTitle = graphicsDevice.createTextBuffer(fontTitle, 50);
         textMenu = new TextBuffer[]{
-                graphicsDevice.createTextBuffer(fontMenu, 16),
-                graphicsDevice.createTextBuffer(fontMenu, 16),
-                graphicsDevice.createTextBuffer(fontMenu, 16),
-                graphicsDevice.createTextBuffer(fontMenu, 16)
+                graphicsDevice.createTextBuffer(fontMenu, 50),
+                graphicsDevice.createTextBuffer(fontMenu, 50),
+                graphicsDevice.createTextBuffer(fontMenu, 50),
+                graphicsDevice.createTextBuffer(fontMenu, 50)
         };
 
-        textTitle.setText("DrivingSim");
+        textTitle.setText("Sokoban");
         textMenu[0].setText("Start Game");
         textMenu[1].setText("Options");
         textMenu[2].setText("Credits");
         textMenu[3].setText("Quit");
 
-        matTitle = Matrix4x4.createTranslation(-120, 100, 0);
+        int dist = -90;
+
+        matTitle = Matrix4x4.createTranslation(0, 30, 0);
         matMenu = new Matrix4x4[]{
-                Matrix4x4.createTranslation(0, -50, 0),
-                Matrix4x4.createTranslation(0, -80, 0),
-                Matrix4x4.createTranslation(0, -110, 0),
-                Matrix4x4.createTranslation(0, -140, 0)
+                Matrix4x4.createTranslation(0, dist, 0),
+                Matrix4x4.createTranslation(0, 2 * dist, 0),
+                Matrix4x4.createTranslation(0, 3 * dist, 0),
+                Matrix4x4.createTranslation(0, 4 * dist, 0)
         };
     }
 
@@ -210,6 +212,6 @@ public class SokobanGame extends Game {
         sceneCamera.setProjection(projection);
 
         matTitle.setIdentity();
-        matTitle.translate(-width / 2, height / 2 - 64, 0);
+        matTitle.translate(-width / 2+35, height / 2-150, 0);
     }
 }
