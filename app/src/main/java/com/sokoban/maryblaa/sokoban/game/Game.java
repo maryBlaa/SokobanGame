@@ -68,9 +68,16 @@ public abstract class Game implements Renderer {
     }
 
     public abstract void initialize();
+
     public abstract void loadContent();
+
     public abstract void update(float deltaSeconds);
+
     public abstract void draw(float deltaSeconds);
+
     public abstract void resize(int width, int height);
 
+    public boolean onBackPressed() {
+        return false;
+    }
 }

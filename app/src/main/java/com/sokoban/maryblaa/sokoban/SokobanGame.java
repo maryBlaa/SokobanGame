@@ -1,9 +1,11 @@
 package com.sokoban.maryblaa.sokoban;
 
+import android.app.Activity;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 
+import com.sokoban.maryblaa.sokoban.collision.AABB;
 import com.sokoban.maryblaa.sokoban.game.Game;
 import com.sokoban.maryblaa.sokoban.graphics.Camera;
 import com.sokoban.maryblaa.sokoban.graphics.CompareFunction;
@@ -14,9 +16,14 @@ import com.sokoban.maryblaa.sokoban.graphics.TextBuffer;
 import com.sokoban.maryblaa.sokoban.graphics.Texture;
 import com.sokoban.maryblaa.sokoban.input.InputEvent;
 import com.sokoban.maryblaa.sokoban.math.Matrix4x4;
+import com.sokoban.maryblaa.sokoban.math.Vector3;
+import com.sokoban.maryblaa.sokoban.collision.Point;
+
 
 import java.io.IOException;
 import java.io.InputStream;
+
+import javax.microedition.khronos.opengles.GL10;
 
 /**
  * Created by maryBlaa on 02.02.2016.
@@ -37,11 +44,24 @@ public class SokobanGame extends Game {
     private Matrix4x4 matTitle;
     private TextBuffer[] textMenu;
     private Matrix4x4[] matMenu;
-    private boolean showMenu;
+    private boolean showMenu = true;
+    private int screenHeight;
+    private int screenWidth;
+    private AABB[] aabbMenu;
 
     public SokobanGame(View view) {
         super(view);
     }
+
+    enum MenuEntry {
+        STARTGAME("Start Game"), OPTIONS("Options"), CREDITS("Credits"), QUIT("Quit");
+
+        private final String menuTitle;
+
+        MenuEntry(String menuTitle) {
+                    this.menuTitle = menuTitle;
+        }
+    };
 
     @Override
     public void initialize() {
@@ -119,12 +139,12 @@ public class SokobanGame extends Game {
         };
 
         textTitle.setText("Sokoban");
-        textMenu[0].setText("Start Game");
-        textMenu[1].setText("Options");
-        textMenu[2].setText("Credits");
-        textMenu[3].setText("Quit");
 
-        int dist = -90;
+        for(MenuEntry entrie : MenuEntry.values() ) {
+            textMenu[entrie.ordinal()].setText(entrie.menuTitle);
+        }
+
+        int dist = -120;
 
         matTitle = Matrix4x4.createTranslation(0, 30, 0);
         matMenu = new Matrix4x4[]{
@@ -133,6 +153,21 @@ public class SokobanGame extends Game {
                 Matrix4x4.createTranslation(0, 3 * dist, 0),
                 Matrix4x4.createTranslation(0, 4 * dist, 0)
         };
+
+        aabbMenu = new AABB[] {
+                new AABB(0, dist, 1000, -dist, MenuEntry.STARTGAME),
+                new AABB(0, dist * 2, 1000, -dist, MenuEntry.OPTIONS),
+                new AABB(0, dist * 3, 1000, -dist, MenuEntry.CREDITS),
+                new AABB(0, dist * 4, 1000, -dist, MenuEntry.QUIT)
+        };
+    }
+
+    @Override
+    public void onSurfaceChanged(GL10 gl, int width, int height) {
+        super.onSurfaceChanged(gl, width, height);
+
+        screenWidth = width;
+        screenHeight = height;
     }
 
     @Override
@@ -151,6 +186,9 @@ public class SokobanGame extends Game {
                                 case KeyEvent.KEYCODE_MENU:
                                     showMenu = !showMenu;
                                     break;
+                                case KeyEvent.KEYCODE_BACK:
+                                    onBackPressed();
+                                    break;
                             }
                             break;
                     }
@@ -163,15 +201,51 @@ public class SokobanGame extends Game {
                     Log.d(TAG, "" + inputEvent.getAction().toString());
                     switch (inputEvent.getAction()) {
                         case DOWN:
-                            showMenu = !showMenu;
+
+                            Vector3 screenTouchPosition = new Vector3(
+                                    (inputEvent.getValues()[0] / (screenWidth / 2) - 1),
+                                    -(inputEvent.getValues()[1] / (screenHeight / 2) - 1),
+                                    0);
+
+                            Vector3 worldTouchPosition = hudCamera.unproject(screenTouchPosition, 1);
+
+                            Point touchPoint = new Point(worldTouchPosition.getX(), worldTouchPosition.getY());
+                            Log.d(TAG, touchPoint.toString());
+
+                            for (int i = 0; i < aabbMenu.length; ++i) {
+                                AABB aabb = aabbMenu[i];
+
+                                if (touchPoint.intersects(aabb)) {
+                                    MenuEntry entry = (MenuEntry) aabb.getRelatedObj();
+                                    parseMenuEntry(entry);
+                                }
+
+                            }
                             break;
                     }
-                    break;
-            }
 
+
+            }
             inputSystem.popEvent();
             inputEvent = inputSystem.peekEvent();
+
         }
+    }
+
+    private void parseMenuEntry(MenuEntry entry) {
+        switch (entry) {
+            case STARTGAME:
+                showMenu = !showMenu;
+                break;
+            case OPTIONS:
+                break;
+            case CREDITS:
+                break;
+            case QUIT:
+                ((Activity) view.getContext()).finish();
+                break;
+        }
+
     }
 
     @Override
@@ -180,10 +254,16 @@ public class SokobanGame extends Game {
 
         graphicsDevice.setCamera(sceneCamera);
 
-        if (!showMenu) {
+        if (showMenu) {
             // Text auf dem HUD zeichnen
             graphicsDevice.setCamera(hudCamera);
             renderer.drawText(textTitle, matTitle);
+//            renderer.drawRect(textTitle.getBounds(),textTitle.getSpriteFont().getMaterial(), matTitle);
+
+
+
+
+
 
             for (int i = 0; i < textMenu.length; ++i)
                 renderer.drawText(textMenu[i], matMenu[i]);
@@ -214,4 +294,16 @@ public class SokobanGame extends Game {
         matTitle.setIdentity();
         matTitle.translate(-width / 2+35, height / 2-150, 0);
     }
+
+    public boolean onBackPressed() {
+        if(showMenu) {
+            parseMenuEntry(MenuEntry.QUIT);
+        } else {
+            showMenu = !showMenu;
+        }
+
+        return true;
+    }
+
+
 }

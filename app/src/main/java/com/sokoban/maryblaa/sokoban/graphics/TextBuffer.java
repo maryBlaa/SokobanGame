@@ -13,6 +13,8 @@ public class TextBuffer {
 
     private Mesh mesh;
     private SpriteFont spriteFont;
+    private float width;
+    private float height;
 
     protected TextBuffer(GraphicsDevice graphicsDevice, SpriteFont spriteFont, int count) {
         VertexElement[] elements = new VertexElement[]{
@@ -55,6 +57,9 @@ public class TextBuffer {
             float texRight = (float) info.bounds.right / (float) texture.getWidth();
             float texTop = 1.0f - (float) info.bounds.top / (float) texture.getHeight();
             float texBottom = 1.0f - (float) info.bounds.bottom / (float) texture.getHeight();
+
+            width = posRight;
+            height = Math.max(height, posTop);
 
             // Dreieck 1
             data.putFloat(posLeft);
@@ -99,5 +104,9 @@ public class TextBuffer {
 
     public SpriteFont getSpriteFont() {
         return spriteFont;
+    }
+
+    public float[] getBounds() {
+        return new float[]{width, height};
     }
 }

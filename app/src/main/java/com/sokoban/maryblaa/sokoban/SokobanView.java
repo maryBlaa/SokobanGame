@@ -16,4 +16,8 @@ public class SokobanView extends android.opengl.GLSurfaceView {
 
         setRenderMode(RENDERMODE_CONTINUOUSLY);
     }
+
+    public boolean onBackPressed() {
+        return game.onBackPressed();
+    }
 }

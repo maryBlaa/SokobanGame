@@ -91,6 +91,12 @@ public class Matrix4x4 {
         return result;
     }
 
+    public Matrix4x4 getInverse() {
+        Matrix4x4 result = new Matrix4x4();
+        Matrix.invertM(result.m, 0, m, 0);
+        return result;
+    }
+
     public Matrix4x4 getTranspose() {
         Matrix4x4 result = new Matrix4x4();
         Matrix.transposeM(result.m, 0, m, 0);

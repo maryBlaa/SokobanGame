@@ -32,4 +32,11 @@ public class MainActivity extends Activity {
         super.onResume();
         view.onResume();
     }
+
+    @Override
+    public void onBackPressed() {
+        if(!view.onBackPressed()) {
+            super.onBackPressed();
+        }
+    }
 }
