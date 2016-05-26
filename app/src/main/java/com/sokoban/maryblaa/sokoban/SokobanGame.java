@@ -33,18 +33,18 @@ public class SokobanGame extends Game {
     public static final String TAG = SokobanGame.class.getSimpleName();
 
     private Camera hudCamera, sceneCamera;
-    private Mesh meshTree, meshRoad;
-    private Texture texTree, texRoad;
-    private Material matTree, matRoad;
-    private Matrix4x4 worldRoad;
-    private Matrix4x4[] worldTrees;
+    private Mesh meshBall, meshPaddle;
+    private Texture texBall, texPaddle;
+    private Material matBall, matPaddle;
+    private Matrix4x4 worldBall;
+    private Matrix4x4[] worldRackets;
 
     private SpriteFont fontTitle, fontMenu;
     private TextBuffer textTitle;
     private Matrix4x4 matTitle;
     private TextBuffer[] textMenu;
     private Matrix4x4[] matMenu;
-    private boolean showMenu = true;
+    private boolean showMenu = false;
     private int screenHeight;
     private int screenWidth;
     private AABB[] aabbMenu;
@@ -76,52 +76,50 @@ public class SokobanGame extends Game {
         hudCamera.setView(view);
 
         projection = new Matrix4x4();
-        projection.setPerspectiveProjection(-0.1f, 0.1f, -0.1f, 0.1f, 0.1f, 16.0f);
+        projection.setOrhtogonalProjection(-0.1f, 0.1f, -0.1f, 0.1f, 0.1f, 8f);
         view = new Matrix4x4();
         view.translate(0, -1, 0);
         sceneCamera = new Camera();
         sceneCamera.setProjection(projection);
         sceneCamera.setView(view);
 
-        matTree = new Material();
-        matTree.setAlphaTestFunction(CompareFunction.GREATER);
-        matTree.setAlphaTestValue(0.9f);
+        matBall = new Material();
+        matBall.setAlphaTestFunction(CompareFunction.GREATER);
+        matBall.setAlphaTestValue(0.9f);
 
-        matRoad = new Material();
+        matPaddle = new Material();
 
-        worldTrees = new Matrix4x4[] {
-                Matrix4x4.multiply(Matrix4x4.createTranslation(-1.2f, 0, -1), Matrix4x4.createRotationY(-20)),
-                Matrix4x4.multiply(Matrix4x4.createTranslation(-1.2f, 0, -3), Matrix4x4.createRotationY(45)),
-                Matrix4x4.multiply(Matrix4x4.createTranslation(-1.2f, 0, -5), Matrix4x4.createRotationY(-30)),
-                Matrix4x4.multiply(Matrix4x4.createTranslation(-1.2f, 0, -7), Matrix4x4.createRotationY(160)),
-                Matrix4x4.multiply(Matrix4x4.createTranslation(+1.2f, 0, -1), Matrix4x4.createRotationY(35)),
-                Matrix4x4.multiply(Matrix4x4.createTranslation(+1.2f, 0, -3), Matrix4x4.createRotationY(-50)),
-                Matrix4x4.multiply(Matrix4x4.createTranslation(+1.2f, 0, -5), Matrix4x4.createRotationY(90)),
-                Matrix4x4.multiply(Matrix4x4.createTranslation(+1.2f, 0, -7), Matrix4x4.createRotationY(15)),
+
+        worldRackets = new Matrix4x4[] {
+                Matrix4x4.createTranslation(-400f, 0, 0).scale(200f),
+                Matrix4x4.createTranslation(400f, 0, 0).scale(200f)
         };
 
-        worldRoad = new Matrix4x4();
-        worldRoad.translate(0, 0, 1);
+        worldBall = new Matrix4x4();
+        worldBall.scale(70f);
+        worldBall.translate(0, 0, 0);
     }
+
+    private int frame = 0;
 
     @Override
     public void loadContent() {
         try {
             InputStream stream;
 
-            stream = context.getAssets().open("tree.obj");
-            meshTree = Mesh.loadFromOBJ(stream);
+            stream = context.getAssets().open("ownBall.obj");
+            meshBall = Mesh.loadFromOBJ(stream);
 
-            stream = context.getAssets().open("tree.png");
-            texTree = graphicsDevice.createTexture(stream);
-            matTree.setTexture(texTree);
+            stream = context.getAssets().open("ball.jpg");
+            texBall = graphicsDevice.createTexture(stream);
+            matBall.setTexture(texBall);
 
-            stream = context.getAssets().open("road.obj");
-            meshRoad = Mesh.loadFromOBJ(stream);
+            stream = context.getAssets().open("ownPaddle.obj");
+            meshPaddle = Mesh.loadFromOBJ(stream);
 
-            stream = context.getAssets().open("road.png");
-            texRoad = graphicsDevice.createTexture(stream);
-            matRoad.setTexture(texRoad);
+            stream = context.getAssets().open("woodSmall.png");
+            texPaddle = graphicsDevice.createTexture(stream);
+            matPaddle.setTexture(texPaddle);
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -256,26 +254,45 @@ public class SokobanGame extends Game {
 
         if (showMenu) {
             // Text auf dem HUD zeichnen
-            graphicsDevice.setCamera(hudCamera);
-            renderer.drawText(textTitle, matTitle);
+            drawMenu();
+        } else {
+            drawGame();
+
+
+        }
+    }
+
+    float maxPosition = 5.0f;
+    float currentPosition = 0;
+    float speed = 0.15f;
+    int direction = 1;
+
+    private void drawGame() {frame++;
+
+        currentPosition += speed * direction;
+        if(Math.abs(currentPosition) > maxPosition) {
+            direction *= -1;
+        }
+
+        // Strasse zeichnen
+        worldBall.translate(speed * direction, 0, 0);
+//        worldBall.scale(0.99f);
+        System.out.println(frame);
+        renderer.drawMesh(meshBall, matBall, worldBall);
+
+        // Bäume zeichnen
+        for (Matrix4x4 worldRacket : worldRackets)
+            renderer.drawMesh(meshPaddle, matPaddle, worldRacket);
+    }
+
+    private void drawMenu() {
+        graphicsDevice.setCamera(hudCamera);
+        renderer.drawText(textTitle, matTitle);
 //            renderer.drawRect(textTitle.getBounds(),textTitle.getSpriteFont().getMaterial(), matTitle);
 
 
-
-
-
-
-            for (int i = 0; i < textMenu.length; ++i)
-                renderer.drawText(textMenu[i], matMenu[i]);
-        } else {
-            // Strasse zeichnen
-            renderer.drawMesh(meshRoad, matRoad, worldRoad);
-
-            // Bäume zeichnen
-            for (Matrix4x4 worldTree : worldTrees)
-                renderer.drawMesh(meshTree, matTree, worldTree);
-
-        }
+        for (int i = 0; i < textMenu.length; ++i)
+            renderer.drawText(textMenu[i], matMenu[i]);
     }
 
     @Override
@@ -288,7 +305,7 @@ public class SokobanGame extends Game {
         hudCamera.setProjection(projection);
 
         projection = new Matrix4x4();
-        projection.setPerspectiveProjection(-0.1f * aspect, 0.1f * aspect, -0.1f, 0.1f, 0.1f, 100.0f);
+        projection.setOrhtogonalProjection(-width / 2, width / 2, -height / 2, height / 2, 0.0f, 100.0f);
         sceneCamera.setProjection(projection);
 
         matTitle.setIdentity();
