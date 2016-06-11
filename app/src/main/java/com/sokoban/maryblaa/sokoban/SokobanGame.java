@@ -58,6 +58,11 @@ public class SokobanGame extends Game {
     private MediaPlayer bounce2;
     private MediaPlayer ooooooooh;
 
+    private enum GameState {
+        PRESTART, PLAYING, PAUSED, GAMEOVER
+    }
+    private GameState state = GameState.PRESTART;
+
     public SokobanGame(View view) {
         super(view);
     }
@@ -250,16 +255,34 @@ public class SokobanGame extends Game {
 
     private void detectPaddleTouchDown(Point touchPoint) {
 
+        switch(state) {
 
-        float x = touchPoint.getPosition().getX();
-        float y = touchPoint.getPosition().getY();
+            case PRESTART:
+                state = GameState.PLAYING;
+                break;
+            case PLAYING:
+                float x = touchPoint.getPosition().getX();
+                float y = touchPoint.getPosition().getY();
 
-        int index = x < 0 ? 0 : 1;
-        paddleFingerPosition[index] = y - paddlePositions[index];
+                int index = x < 0 ? 0 : 1;
+                paddleFingerPosition[index] = y - paddlePositions[index];
+                break;
+            case PAUSED:
+                state = GameState.PLAYING;
+                break;
+            case GAMEOVER:
+                state = GameState.PLAYING;
+                break;
+        }
+
 
     }
 
     private void detectPaddleTouchMove(Point touchPoint) {
+
+        if(state != GameState.PLAYING) {
+            return;
+        }
 
 
         float x = touchPoint.getPosition().getX();
@@ -334,8 +357,8 @@ public class SokobanGame extends Game {
         do {
             random = Math.random() * 360;
         }
-        while(!(random > 85 * Math.PI && random > 95) &&
-              !(random > 265 && random > 275));
+        while(!(random > 65 * Math.PI && random > 115) &&
+              !(random > 245 && random > 295));
 
         return (float) random;
     }
@@ -345,45 +368,57 @@ public class SokobanGame extends Game {
     private void drawGame() {
         frame++;
 
-        ballPositionX += speed * Math.sin(Math.toRadians(ballAngle));
-        ballPositionY += speed * Math.cos(Math.toRadians(ballAngle));
-        if (ballPositionX > maxPosition) {
-            // right Paddle
+        if(state == GameState.PLAYING) {
+            ballPositionX += speed * Math.sin(Math.toRadians(ballAngle));
+            ballPositionY += speed * Math.cos(Math.toRadians(ballAngle));
+            if (ballPositionX > maxPosition) {
+                // right Paddle
+                float distance = ballPositionY - paddlePositions[1];
+                if(Math.abs(distance) > paddleSize) {
+                    setGameoverState();
+                    return;
+                }
 
+                if(bounce1.isPlaying()) {
+                    bounce1.seekTo(1);
+                }
+                bounce1.start();
+            } else if(ballPositionX < -maxPosition) {
+                // left Paddle
+                float distance = ballPositionY - paddlePositions[0];
+                if(Math.abs(distance) > paddleSize) {
+                    setGameoverState();
+                    return;
+                }
 
-            if(bounce1.isPlaying()) {
-                bounce1.seekTo(1);
+                if(bounce2.isPlaying()) {
+                    bounce2.seekTo(1);
+                }
+                bounce2.start();
             }
-            bounce1.start();
-        } else if(ballPositionX < -maxPosition) {
-            // left Paddle
-            if(bounce2.isPlaying()) {
-                bounce2.seekTo(1);
-            }
-            bounce2.start();
-        }
 
-        float tmp = ballAngle;
+            float tmp = ballAngle;
 
-        if(Math.abs(ballPositionY) > screenHeight / 2 - ballSize) {
-            if(ballAngle > 0 * Math.PI && ballAngle < Math.PI) {
-                ballAngle = (float) ((90 + (90 - ballAngle)) % 360);
-                Log.d(TAG, "vertikale Kante: von " + tmp + " nach " + ballAngle);
-
-            } else {
-                ballAngle = (float) ((270 + (270 - ballAngle)) % 360);
-                Log.d(TAG, "vertikale Kante: von " + tmp + " nach " + ballAngle);
-
-            }
-        } else {
-            if(Math.abs(ballPositionX) > maxPosition) {
-                if(ballAngle > 90 && ballAngle < 270) {
-                    ballAngle = (float) ((180 + (180 - ballAngle)) % 360);
-                    Log.d(TAG, "horizontale Kante: von " + tmp + " nach " + ballAngle);
+            if(Math.abs(ballPositionY) > screenHeight / 2 - ballSize) {
+                if(ballAngle > 0 * Math.PI && ballAngle < Math.PI) {
+                    ballAngle = (float) ((90 + (90 - ballAngle)) % 360);
+                    Log.d(TAG, "vertikale Kante: von " + tmp + " nach " + ballAngle);
 
                 } else {
-                    ballAngle = (float) ((360 - ballAngle) % 360);
-                    Log.d(TAG, "horizontale Kante: von " + tmp + " nach " + ballAngle);
+                    ballAngle = (float) ((270 + (270 - ballAngle)) % 360);
+                    Log.d(TAG, "vertikale Kante: von " + tmp + " nach " + ballAngle);
+
+                }
+            } else {
+                if(Math.abs(ballPositionX) > maxPosition) {
+                    if(ballAngle > 90 && ballAngle < 270) {
+                        ballAngle = (float) ((180 + (180 - ballAngle)) % 360);
+                        Log.d(TAG, "horizontale Kante: von " + tmp + " nach " + ballAngle);
+
+                    } else {
+                        ballAngle = (float) ((360 - ballAngle) % 360);
+                        Log.d(TAG, "horizontale Kante: von " + tmp + " nach " + ballAngle);
+                    }
                 }
             }
         }
@@ -396,6 +431,30 @@ public class SokobanGame extends Game {
         // Paddles zeichnen
         for (Matrix4x4 worldPaddle : worldPaddles)
             renderer.drawMesh(meshPaddle, matPaddle, worldPaddle);
+    }
+
+    private void setGameoverState() {
+        if(ooooooooh.isPlaying()) {
+            ooooooooh.seekTo(0);
+        } else {
+            ooooooooh.start();
+        }
+        state = GameState.GAMEOVER;
+        resetPositions();
+    }
+
+    private void resetPositions() {
+        paddlePositions[0] = 0;
+        paddlePositions[1] = 0;
+        paddleFingerPosition[0] = 0;
+        paddleFingerPosition[1] = 0;
+        ballPositionY = 0;
+        ballPositionX = 0;
+        ballAngle = getBallStartPosition();
+        worldPaddles = new Matrix4x4[]{
+                Matrix4x4.createTranslation(-paddleTranslationX, 0, 0).scale(paddleSize),
+                Matrix4x4.createTranslation(paddleTranslationX, 0, 0).scale(paddleSize)
+        };
     }
 
     private void drawMenu() {
@@ -429,7 +488,8 @@ public class SokobanGame extends Game {
         if (showMenu) {
             parseMenuEntry(MenuEntry.QUIT);
         } else {
-            showMenu = !showMenu;
+            state = GameState.PAUSED;
+            showMenu = true;
         }
 
         return true;
