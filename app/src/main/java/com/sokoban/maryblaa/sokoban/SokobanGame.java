@@ -1,6 +1,7 @@
 package com.sokoban.maryblaa.sokoban;
 
 import android.app.Activity;
+import android.media.MediaPlayer;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
@@ -49,8 +50,13 @@ public class SokobanGame extends Game {
     private AABB[] aabbMenu;
     private float paddleTranslationX = 400f;
     private static final float paddleSize = 200f;
+    private static final float ballSize = 70f;
+
     private float[] paddlePositions = new float[]{0, 0};
     private float[] paddleFingerPosition = new float[]{0, 0};
+    private MediaPlayer bounce1;
+    private MediaPlayer bounce2;
+    private MediaPlayer ooooooooh;
 
     public SokobanGame(View view) {
         super(view);
@@ -83,7 +89,7 @@ public class SokobanGame extends Game {
         projection = new Matrix4x4();
         projection.setOrthogonalProjection(-0.1f, 0.1f, -0.1f, 0.1f, 0.1f, 8f);
         view = new Matrix4x4();
-        view.translate(0, -1, 0);
+        view.translateBy(0, -1, 0);
         sceneCamera = new Camera();
         sceneCamera.setProjection(projection);
         sceneCamera.setView(view);
@@ -100,8 +106,12 @@ public class SokobanGame extends Game {
         };
 
         worldBall = new Matrix4x4();
-        worldBall.scale(70f);
-        worldBall.translate(0, 0, 0);
+        worldBall.scale(ballSize);
+        worldBall.translateBy(0, 0, 0);
+
+        bounce1 = MediaPlayer.create(context, R.raw.boing1);
+        bounce2 = MediaPlayer.create(context, R.raw.boing2);
+        ooooooooh = MediaPlayer.create(context, R.raw.ohoh);
     }
 
     private int frame = 0;
@@ -175,6 +185,7 @@ public class SokobanGame extends Game {
     @Override
     public void update(float deltaSeconds) {
         InputEvent inputEvent = inputSystem.peekEvent();
+
         while (inputEvent != null) {
 
             switch (inputEvent.getDevice()) {
@@ -194,7 +205,7 @@ public class SokobanGame extends Game {
                             }
                             break;
                     }
-                    Log.d(TAG, "" + inputEvent.getDevice());
+//                    Log.d(TAG, "" + inputEvent.getDevice());
                     break;
                 case ROTATION:
 //                    Log.d(TAG, "ROTATION");
@@ -210,7 +221,6 @@ public class SokobanGame extends Game {
 
 
                     Point touchPoint = new Point(worldTouchPosition.getX(), worldTouchPosition.getY());
-                    Log.d(TAG, touchPoint.toString());
 
                     switch (inputEvent.getAction()) {
                         case DOWN:
@@ -256,10 +266,17 @@ public class SokobanGame extends Game {
         float y = touchPoint.getPosition().getY();
 
         int index = x < 0 ? 0 : 1;
+        Log.d(TAG, "X is " + x + ", y is " + y + ", Index is " + index);
 
         if(Math.abs(paddleFingerPosition[index]) < paddleSize) {
-            paddlePositions[index] += y - (paddlePositions[index] + paddleFingerPosition[index]);
-            worldPaddles[index] = Matrix4x4.createTranslation((index == 0 ? -1 : 1) * paddleTranslationX, paddlePositions[index], 0).scale(paddleSize);
+            float newPosition = paddlePositions[index] + y - (paddlePositions[index] + paddleFingerPosition[index]);
+            if(Math.abs(newPosition) < screenHeight/2 - paddleSize) {
+                paddlePositions[index] = newPosition;
+                worldPaddles[index] = Matrix4x4.createTranslation(
+                        (index == 0 ? -1 : 1) * paddleTranslationX,
+                        paddlePositions[index], 0
+                ).scale(paddleSize);
+            }
         }
 
     }
@@ -307,22 +324,73 @@ public class SokobanGame extends Game {
         }
     }
 
-    float maxPosition = 5.0f;
-    float currentPosition = 0;
-    float speed = 0.15f;
-    int direction = 1;
+    float maxPosition = paddleTranslationX - ballSize;
+    float ballPositionX = 0;
+    float ballPositionY = 0;
+    float ballAngle = getBallStartPosition();
+
+    private float getBallStartPosition() {
+        double random;
+        do {
+            random = Math.random() * 360;
+        }
+        while(!(random > 85 * Math.PI && random > 95) &&
+              !(random > 265 && random > 275));
+
+        return (float) random;
+    }
+
+    float speed = 10f;
 
     private void drawGame() {
         frame++;
 
-        currentPosition += speed * direction;
-        if (Math.abs(currentPosition) > maxPosition) {
-            direction *= -1;
+        ballPositionX += speed * Math.sin(Math.toRadians(ballAngle));
+        ballPositionY += speed * Math.cos(Math.toRadians(ballAngle));
+        if (ballPositionX > maxPosition) {
+            // right Paddle
+
+
+            if(bounce1.isPlaying()) {
+                bounce1.seekTo(1);
+            }
+            bounce1.start();
+        } else if(ballPositionX < -maxPosition) {
+            // left Paddle
+            if(bounce2.isPlaying()) {
+                bounce2.seekTo(1);
+            }
+            bounce2.start();
         }
 
+        float tmp = ballAngle;
+
+        if(Math.abs(ballPositionY) > screenHeight / 2 - ballSize) {
+            if(ballAngle > 0 * Math.PI && ballAngle < Math.PI) {
+                ballAngle = (float) ((90 + (90 - ballAngle)) % 360);
+                Log.d(TAG, "vertikale Kante: von " + tmp + " nach " + ballAngle);
+
+            } else {
+                ballAngle = (float) ((270 + (270 - ballAngle)) % 360);
+                Log.d(TAG, "vertikale Kante: von " + tmp + " nach " + ballAngle);
+
+            }
+        } else {
+            if(Math.abs(ballPositionX) > maxPosition) {
+                if(ballAngle > 90 && ballAngle < 270) {
+                    ballAngle = (float) ((180 + (180 - ballAngle)) % 360);
+                    Log.d(TAG, "horizontale Kante: von " + tmp + " nach " + ballAngle);
+
+                } else {
+                    ballAngle = (float) ((360 - ballAngle) % 360);
+                    Log.d(TAG, "horizontale Kante: von " + tmp + " nach " + ballAngle);
+                }
+            }
+        }
+
+
         // Ball zeichnen
-        worldBall.translate(speed * direction, 0, 0);
-//        worldBall.scale(0.99f);
+        worldBall = Matrix4x4.createTranslation(ballPositionX, ballPositionY, 0).scale(ballSize);
         renderer.drawMesh(meshBall, matBall, worldBall);
 
         // Paddles zeichnen
@@ -354,7 +422,7 @@ public class SokobanGame extends Game {
         sceneCamera.setProjection(projection);
 
         matTitle.setIdentity();
-        matTitle.translate(-width / 2 + 35, height / 2 - 150, 0);
+        matTitle.translateBy(-width / 2 + 35, height / 2 - 150, 0);
     }
 
     public boolean onBackPressed() {

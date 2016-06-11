@@ -20,6 +20,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 public class InputSystem implements View.OnKeyListener, View.OnTouchListener, SensorEventListener {
 
 
+    private static final String TAG = InputSystem.class.getSimpleName();
     private Queue<InputEvent> inputQueue;
     private Queue<InputEvent> inputPool;
 
@@ -109,15 +110,16 @@ public class InputSystem implements View.OnKeyListener, View.OnTouchListener, Se
         InputDevice device = InputDevice.TOUCHSCREEN;
         InputEvent.InputAction action = InputEvent.InputAction.NONE;
         float time = event.getEventTime() / 1000.0f;
-        float x = event.getX();
-        float y = event.getY();
 
-        switch (event.getAction()) {
+        switch (event.getActionMasked()) {
             case MotionEvent.ACTION_DOWN:
+            case MotionEvent.ACTION_POINTER_DOWN:
                 action = InputEvent.InputAction.DOWN;
                 break;
 
             case MotionEvent.ACTION_UP:
+            case MotionEvent.ACTION_POINTER_UP:
+            case MotionEvent.ACTION_CANCEL:
                 action = InputEvent.InputAction.UP;
                 break;
 
@@ -129,12 +131,17 @@ public class InputSystem implements View.OnKeyListener, View.OnTouchListener, Se
                 return false;
         }
 
-        InputEvent inputEvent = inputPool.poll();
-        if (inputEvent == null)
-            return false;
 
-        inputEvent.set(device, action, time, 0, x, y, 0, 0);
-        inputQueue.add(inputEvent);
+        for(int i = 0; i < event.getPointerCount(); i++) {
+            float x = event.getX(i);
+            float y = event.getY(i);
+
+            InputEvent inputEvent = inputPool.poll();
+            if (inputEvent == null)
+                return false;
+            inputEvent.set(device, action, time, 0, x, y, 0, 0);
+            inputQueue.add(inputEvent);
+        }
 
         return true;
     }

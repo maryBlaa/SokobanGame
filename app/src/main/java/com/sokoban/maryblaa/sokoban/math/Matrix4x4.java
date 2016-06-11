@@ -76,7 +76,7 @@ public class Matrix4x4 {
 
     public static Matrix4x4 createTranslation(float x, float y, float z) {
         Matrix4x4 mat = new Matrix4x4();
-        return mat.translate(x, y, z);
+        return mat.translateBy(x, y, z);
     }
 
     public static Matrix4x4 multiply(Matrix4x4 m1, Matrix4x4 m2) {
@@ -145,7 +145,7 @@ public class Matrix4x4 {
         return this;
     }
 
-    public Matrix4x4 translate(float x, float y, float z) {
+    public Matrix4x4 translateBy(float x, float y, float z) {
         Matrix.translateM(m, 0, x, y, z);
         return this;
     }
@@ -155,7 +155,7 @@ public class Matrix4x4 {
         return this;
     }
 
-    public Matrix4x4 setOrhtogonalProjection(float left, float right, float bottom, float top, float near, float far) {
+    public Matrix4x4 setOrthogonalProjection(float left, float right, float bottom, float top, float near, float far) {
         Matrix.orthoM(m, 0, left, right, bottom, top, near, far);
         return this;
     }
