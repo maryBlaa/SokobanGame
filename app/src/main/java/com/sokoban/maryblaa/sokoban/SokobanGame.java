@@ -19,9 +19,13 @@ import com.sokoban.maryblaa.sokoban.graphics.Texture;
 import com.sokoban.maryblaa.sokoban.input.InputEvent;
 import com.sokoban.maryblaa.sokoban.math.Matrix4x4;
 import com.sokoban.maryblaa.sokoban.math.Vector3;
+import com.sokoban.maryblaa.sokoban.powerups.AbstractPowerUp;
+import com.sokoban.maryblaa.sokoban.powerups.BallEnlarger;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.microedition.khronos.opengles.GL10;
 
@@ -35,18 +39,18 @@ public class SokobanGame extends Game {
     private Camera hudCamera, sceneCamera;
     private Mesh meshBall, meshPaddle;
     private Texture texBall, texPaddle;
-    private Material matBall, matPaddle;
+    private Material materialBall, materialPaddle;
     private Matrix4x4 worldBall;
     private Matrix4x4[] worldPaddles;
 
     private SpriteFont fontTitle, fontMenu;
     private TextBuffer textTitle;
-    private Matrix4x4 matTitle;
+    private Matrix4x4 posTitle;
     private TextBuffer[] textMenu;
-    private Matrix4x4[] matMenu;
+    private Matrix4x4[] posMenu;
     private boolean showMenu = true;
-    private int screenHeight;
-    private int screenWidth;
+    public int screenHeight;
+    public int screenWidth;
     private AABB[] aabbMenu;
     private float paddleTranslationX = 400f;
     private static final float paddleSize = 200f;
@@ -63,27 +67,37 @@ public class SokobanGame extends Game {
 
     private boolean introPlayed = false;
 
+    private static GameState state = GameState.PRESTART;
+
+    private List<AbstractPowerUp> powerups = new ArrayList<>();
+
     private enum GameState {
-        PRESTART, PLAYING, PAUSED, GAMEOVER
+        PRESTART, PLAYING, PAUSED, GAMEOVER;
+
     }
 
-    private GameState state = GameState.PRESTART;
+    private enum Screen {
+        MENU, GAME, HIGHSCORE, CREDITS
 
-    public SokobanGame(View view) {
-        super(view);
     }
 
     enum MenuEntry {
-        STARTGAME("Start Game"), OPTIONS("Options"), CREDITS("Credits"), QUIT("Quit");
+        RESUME("Resume"), NEWGAME("New Game"), OPTIONS("Options"), HIGHSCORE("Highscore"), CREDITS("Credits"), QUIT("Quit");
 
         private final String menuTitle;
 
         MenuEntry(String menuTitle) {
             this.menuTitle = menuTitle;
         }
+
+        private boolean isVisible() {
+            return this != RESUME || state == GameState.PAUSED;
+        }
     }
 
-    ;
+    public SokobanGame(View view) {
+        super(view);
+    }
 
     @Override
     public void initialize() {
@@ -105,11 +119,11 @@ public class SokobanGame extends Game {
         sceneCamera.setProjection(projection);
         sceneCamera.setView(view);
 
-        matBall = new Material();
-        matBall.setAlphaTestFunction(CompareFunction.GREATER);
-        matBall.setAlphaTestValue(0.9f);
+        materialBall = new Material();
+        materialBall.setAlphaTestFunction(CompareFunction.GREATER);
+        materialBall.setAlphaTestValue(0.9f);
 
-        matPaddle = new Material();
+        materialPaddle = new Material();
 
         worldPaddles = new Matrix4x4[]{
                 Matrix4x4.createTranslation(-paddleTranslationX, 0, 0).scale(paddleSize),
@@ -140,14 +154,14 @@ public class SokobanGame extends Game {
 
             stream = context.getAssets().open("ball.jpg");
             texBall = graphicsDevice.createTexture(stream);
-            matBall.setTexture(texBall);
+            materialBall.setTexture(texBall);
 
             stream = context.getAssets().open("ownPaddle.obj");
             meshPaddle = Mesh.loadFromOBJ(stream);
 
             stream = context.getAssets().open("woodSmall.png");
             texPaddle = graphicsDevice.createTexture(stream);
-            matPaddle.setTexture(texPaddle);
+            materialPaddle.setTexture(texPaddle);
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -157,12 +171,11 @@ public class SokobanGame extends Game {
         fontMenu = graphicsDevice.createSpriteFont(null, 90);
 
         textTitle = graphicsDevice.createTextBuffer(fontTitle, 50);
-        textMenu = new TextBuffer[]{
-                graphicsDevice.createTextBuffer(fontMenu, 50),
-                graphicsDevice.createTextBuffer(fontMenu, 50),
-                graphicsDevice.createTextBuffer(fontMenu, 50),
-                graphicsDevice.createTextBuffer(fontMenu, 50)
-        };
+        textMenu = new TextBuffer[MenuEntry.values().length];
+
+        for (int i = 0; i < MenuEntry.values().length; i++) {
+            textMenu[i] = graphicsDevice.createTextBuffer(fontMenu, 50);
+        }
 
         textTitle.setText("Sokoban");
 
@@ -172,20 +185,17 @@ public class SokobanGame extends Game {
 
         int dist = -120;
 
-        matTitle = Matrix4x4.createTranslation(0, 30, 0);
-        matMenu = new Matrix4x4[]{
-                Matrix4x4.createTranslation(0, dist, 0),
-                Matrix4x4.createTranslation(0, 2 * dist, 0),
-                Matrix4x4.createTranslation(0, 3 * dist, 0),
-                Matrix4x4.createTranslation(0, 4 * dist, 0)
-        };
+        posTitle = Matrix4x4.createTranslation(0, 30, 0);
+        posMenu = new Matrix4x4[MenuEntry.values().length];
 
-        aabbMenu = new AABB[]{
-                new AABB(0, dist, 1000, -dist, MenuEntry.STARTGAME),
-                new AABB(0, dist * 2, 1000, -dist, MenuEntry.OPTIONS),
-                new AABB(0, dist * 3, 1000, -dist, MenuEntry.CREDITS),
-                new AABB(0, dist * 4, 1000, -dist, MenuEntry.QUIT)
-        };
+        for (int i = 0; i < MenuEntry.values().length; i++) {
+            posMenu[i] = Matrix4x4.createTranslation(0, (i+1) * dist, 0);
+        }
+
+        aabbMenu = new AABB[MenuEntry.values().length];
+        for (int i = 0; i < MenuEntry.values().length; i++) {
+            aabbMenu[i] = new AABB(0, (i+1) * dist, 1000, -dist, MenuEntry.values()[i]);
+        }
     }
 
     @Override
@@ -199,7 +209,7 @@ public class SokobanGame extends Game {
     }
 
     @Override
-    public void update(float deltaSeconds) {
+    public void eventUpdate(float deltaSeconds) {
         InputEvent inputEvent = inputSystem.peekEvent();
 
         while (inputEvent != null) {
@@ -320,9 +330,10 @@ public class SokobanGame extends Game {
         for (AABB aabb : aabbMenu) {
             if (touchPoint.intersects(aabb)) {
                 MenuEntry entry = (MenuEntry) aabb.getRelatedObj();
-                parseMenuEntry(entry);
+                if (entry.isVisible()) {
+                    parseMenuEntry(entry);
+                }
             }
-
         }
     }
 
@@ -331,11 +342,18 @@ public class SokobanGame extends Game {
             intro.stop();
         }
         switch (entry) {
-            case STARTGAME:
+            case RESUME:
+                showMenu = !showMenu;
+                state = GameState.PRESTART;
+                break;
+            case NEWGAME:
+                resetPositions();
                 showMenu = !showMenu;
                 miau.start();
                 break;
             case OPTIONS:
+                break;
+            case HIGHSCORE:
                 break;
             case CREDITS:
                 break;
@@ -443,15 +461,21 @@ public class SokobanGame extends Game {
             }
         }
 
+        //PowerUp zeichnen
+        if (frame%100 == 5)
+            powerups.add(new BallEnlarger(this));
+        for (AbstractPowerUp powerup : powerups) {
+            powerup.draw();
+        }
 
         // Ball zeichnen
         worldBall = Matrix4x4.createTranslation(ballPositionX, ballPositionY, 0).scale(ballSize);
 
-        renderer.drawMesh(meshBall, matBall, worldBall);
+        renderer.drawMesh(meshBall, materialBall, worldBall);
 
         // Paddles zeichnen
         for (Matrix4x4 worldPaddle : worldPaddles) {
-            renderer.drawMesh(meshPaddle, matPaddle, worldPaddle);
+            renderer.drawMesh(meshPaddle, materialPaddle, worldPaddle);
         }
     }
 
@@ -507,12 +531,14 @@ public class SokobanGame extends Game {
             intro.start();
         }
         graphicsDevice.setCamera(hudCamera);
-        renderer.drawText(textTitle, matTitle);
-//            renderer.drawRect(textTitle.getBounds(),textTitle.getSpriteFont().getMaterial(), matTitle);
+        renderer.drawText(textTitle, posTitle);
+//            renderer.drawRect(textTitle.getBounds(),textTitle.getSpriteFont().getMaterial(), posTitle);
 
 
         for (int i = 0; i < textMenu.length; ++i)
-            renderer.drawText(textMenu[i], matMenu[i]);
+            if (MenuEntry.values()[i].isVisible()) {
+                renderer.drawText(textMenu[i], posMenu[i]);
+            }
     }
 
     @Override
@@ -528,8 +554,8 @@ public class SokobanGame extends Game {
         projection.setOrthogonalProjection(-width / 2, width / 2, -height / 2, height / 2, 0.0f, 100.0f);
         sceneCamera.setProjection(projection);
 
-        matTitle.setIdentity();
-        matTitle.translateBy(-width / 2 + 35, height / 2 - 150, 0);
+        posTitle.setIdentity();
+        posTitle.translateBy(-width / 2 + 35, height / 2 - 150, 0);
     }
 
     public boolean onBackPressed() {

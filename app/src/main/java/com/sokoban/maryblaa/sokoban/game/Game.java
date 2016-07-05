@@ -20,9 +20,9 @@ public abstract class Game implements Renderer {
     private long lastTime;
 
     protected View view;
-    protected Context context;
-    protected GraphicsDevice graphicsDevice;
-    protected SokobanRenderer renderer;
+    public Context context;
+    public GraphicsDevice graphicsDevice;
+    public SokobanRenderer renderer;
     protected InputSystem inputSystem;
 
     public Game(View view) {
@@ -37,7 +37,7 @@ public abstract class Game implements Renderer {
         long currTime = System.currentTimeMillis();
         float deltaSeconds = (currTime - lastTime) / 1000.0f;
 
-        update(deltaSeconds);
+        eventUpdate(deltaSeconds);
         draw(deltaSeconds);
 
         lastTime = currTime;
@@ -71,7 +71,7 @@ public abstract class Game implements Renderer {
 
     public abstract void loadContent();
 
-    public abstract void update(float deltaSeconds);
+    public abstract void eventUpdate(float deltaSeconds);
 
     public abstract void draw(float deltaSeconds);
 
