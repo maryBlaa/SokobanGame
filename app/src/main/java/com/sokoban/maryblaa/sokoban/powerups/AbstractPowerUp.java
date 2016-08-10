@@ -1,55 +1,106 @@
 package com.sokoban.maryblaa.sokoban.powerups;
 
 import com.sokoban.maryblaa.sokoban.SokobanGame;
-import com.sokoban.maryblaa.sokoban.graphics.CompareFunction;
+import com.sokoban.maryblaa.sokoban.collision.MathHelper;
 import com.sokoban.maryblaa.sokoban.graphics.Material;
 import com.sokoban.maryblaa.sokoban.graphics.Mesh;
 import com.sokoban.maryblaa.sokoban.graphics.Texture;
 import com.sokoban.maryblaa.sokoban.math.Matrix4x4;
 
-import java.io.IOException;
-import java.io.InputStream;
-
 /**
  * Created by DragooNick on 05.07.2016.
  */
 public abstract class AbstractPowerUp {
+
+    public enum PowerupType {
+
+        BALLENLARGER ("ball.jpg", "ownBall.obj"),
+        PADDLEENLARGER ("ball.jpg", "ownBall.obj"),
+        BALLSHRINKER ("ball.jpg", "ownBall.obj"),
+        PADDLESHRINKER ("ball.jpg", "ownBall.obj"),
+        SPEEDUP ("ball.jpg", "ownBall.obj"),
+        SLOWDOWN ("ball.jpg", "ownBall.obj"),
+        BLINK ("ball.jpg", "ownBall.obj"),
+        PADDLEDIRECTIONINVERSER ("ball.jpg", "ownBall.obj");
+
+        public String materialSrc;
+        public String meshSrc;
+
+        PowerupType(String materialSrc, String meshSrc) {
+            this.materialSrc = materialSrc;
+            this.meshSrc = meshSrc;
+        }
+    }
+
     Texture texture;
     Matrix4x4 position;
-    float powerUpSize = 50f;
-    float powerUpPositionX;
-    float powerUpPositionY;
-    float speed;
-    float powerUpAngle;
-    int displayTime;
-    int powerUpTime;
+    public float powerUpSize = 50f;
+    public float powerUpPositionX;
+    public float powerUpPositionY;
+    public float speed;
+    public float powerUpAngle;
+    public int despawnFrame;
+    public int powerUpTime;
     private Mesh meshPowerUp;
     private Material materialPowerUp;
+    protected PowerupType type;
 
-    abstract void performAction();
-    abstract void undoAction();
+    public abstract void performAction();
+    public abstract void undoAction();
+
+    public static AbstractPowerUp spawn(SokobanGame game) {
+        int powerupTypeIndex = MathHelper.randomInt(0, PowerupType.values().length - 1);
+        PowerupType type = PowerupType.values()[powerupTypeIndex];
+
+
+        AbstractPowerUp powerup;
+        switch(type) {
+
+            case BALLENLARGER:
+                powerup = new BallEnlarger(game);
+                break;
+            case PADDLEENLARGER:
+                powerup = new PaddleEnlarger(game);
+                break;
+            case BALLSHRINKER:
+                powerup = new BallShrinker(game);
+                break;
+            case PADDLESHRINKER:
+                powerup = new PaddleShrinker(game);
+                break;
+            case SPEEDUP:
+                powerup = new SpeedUp(game);
+                break;
+            case SLOWDOWN:
+                powerup = new SlowDown(game);
+                break;
+            case BLINK:
+                powerup = new Blink(game);
+                break;
+            case PADDLEDIRECTIONINVERSER:
+                powerup = new PaddleDirectionInverser(game);
+                break;
+            default:
+                return null; // this should never happen until the sun eats the earth
+        }
+        powerup.type = type;
+        powerup.init();
+        return powerup;
+
+    }
 
     private SokobanGame game;
 
     public AbstractPowerUp(SokobanGame game) {
         this.game = game;
+    }
 
-        materialPowerUp = new Material();
-        materialPowerUp.setAlphaTestFunction(CompareFunction.GREATER);
-        materialPowerUp.setAlphaTestValue(0.9f);
+    private void init() {
+        materialPowerUp = game.powerupMaterials.get(type);
+        meshPowerUp = game.powerupMeshes.get(type);
 
-        InputStream stream;
-
-        try {
-            stream = game.context.getAssets().open("ownBall.obj");
-            meshPowerUp = Mesh.loadFromOBJ(stream);
-
-            stream = game.context.getAssets().open("ball.jpg");
-            Texture texPowerUp = game.graphicsDevice.createTexture(stream);
-            materialPowerUp.setTexture(texPowerUp);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        int displayTime = MathHelper.randomInt(150, 350);
+        despawnFrame = displayTime + game.frame;
     }
 
     public void draw(){

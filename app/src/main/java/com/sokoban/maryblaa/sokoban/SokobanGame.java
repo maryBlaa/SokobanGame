@@ -7,6 +7,7 @@ import android.view.KeyEvent;
 import android.view.View;
 
 import com.sokoban.maryblaa.sokoban.collision.AABB;
+import com.sokoban.maryblaa.sokoban.collision.MathHelper;
 import com.sokoban.maryblaa.sokoban.collision.Point;
 import com.sokoban.maryblaa.sokoban.game.Game;
 import com.sokoban.maryblaa.sokoban.graphics.Camera;
@@ -20,11 +21,11 @@ import com.sokoban.maryblaa.sokoban.input.InputEvent;
 import com.sokoban.maryblaa.sokoban.math.Matrix4x4;
 import com.sokoban.maryblaa.sokoban.math.Vector3;
 import com.sokoban.maryblaa.sokoban.powerups.AbstractPowerUp;
-import com.sokoban.maryblaa.sokoban.powerups.BallEnlarger;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import javax.microedition.khronos.opengles.GL10;
@@ -69,7 +70,13 @@ public class SokobanGame extends Game {
 
     private static GameState state = GameState.PRESTART;
 
-    private List<AbstractPowerUp> powerups = new ArrayList<>();
+    private List<AbstractPowerUp> powerupsActive = new ArrayList<>();
+
+    private AbstractPowerUp visiblePowerup = null;
+    private int spawnFrame = 0;
+
+    public HashMap<AbstractPowerUp.PowerupType, Mesh> powerupMeshes;
+    public HashMap<AbstractPowerUp.PowerupType, Material> powerupMaterials;
 
     private enum GameState {
         PRESTART, PLAYING, PAUSED, GAMEOVER;
@@ -140,9 +147,37 @@ public class SokobanGame extends Game {
         intro = MediaPlayer.create(context, R.raw.intro);
         miau = MediaPlayer.create(context, R.raw.miau);
         ooooooooh = MediaPlayer.create(context, R.raw.ohoh);
+
+        powerupMaterials = new HashMap<>();
+        powerupMeshes = new HashMap<>();
+
+        for (AbstractPowerUp.PowerupType powerupType : AbstractPowerUp.PowerupType.values()) {
+
+            Material materialPowerUp = new Material();
+            materialPowerUp.setAlphaTestFunction(CompareFunction.GREATER);
+            materialPowerUp.setAlphaTestValue(0.9f);
+
+            InputStream stream;
+            Mesh mesh = null;
+
+            try {
+                stream = context.getAssets().open(powerupType.meshSrc);
+                mesh = Mesh.loadFromOBJ(stream);
+
+                stream = context.getAssets().open(powerupType.materialSrc);
+                Texture texPowerUp = graphicsDevice.createTexture(stream);
+                materialPowerUp.setTexture(texPowerUp);
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            powerupMaterials.put(powerupType, materialPowerUp);
+            powerupMeshes.put(powerupType, mesh);
+        }
     }
 
-    private int frame = 0;
+    public int frame = 0;
 
     @Override
     public void loadContent() {
@@ -280,6 +315,8 @@ public class SokobanGame extends Game {
 
             case PRESTART:
                 state = GameState.PLAYING;
+                frame = 0;
+                spawnFrame = 0;
                 break;
             case PLAYING:
                 float x = touchPoint.getPosition().getX();
@@ -310,7 +347,6 @@ public class SokobanGame extends Game {
         float y = touchPoint.getPosition().getY();
 
         int index = x < 0 ? 0 : 1;
-        Log.d(TAG, "X is " + x + ", y is " + y + ", Index is " + index);
 
         if (Math.abs(paddleFingerPosition[index]) < paddleSize) {
             float newPosition = paddlePositions[index] + y - (paddlePositions[index] + paddleFingerPosition[index]);
@@ -401,7 +437,11 @@ public class SokobanGame extends Game {
     float speed = 15f;
 
     private void drawGame() {
-        frame++;
+        if(state == GameState.PLAYING) {
+            frame++;
+        }
+        System.out.println(frame);
+
         float distance;
 
         if (state == GameState.PLAYING) {
@@ -462,10 +502,15 @@ public class SokobanGame extends Game {
         }
 
         //PowerUp zeichnen
-        if (frame%100 == 5)
-            powerups.add(new BallEnlarger(this));
-        for (AbstractPowerUp powerup : powerups) {
-            powerup.draw();
+        if (shouldSpawn()) {
+            visiblePowerup = AbstractPowerUp.spawn(this);
+        }
+        if (visiblePowerup != null) {
+            if(visiblePowerup.despawnFrame >= frame) {
+                visiblePowerup.draw();
+            } else {
+                visiblePowerup = null;
+            }
         }
 
         // Ball zeichnen
@@ -523,6 +568,12 @@ public class SokobanGame extends Game {
                 Matrix4x4.createTranslation(paddleTranslationX, 0, 0).scale(paddleSize)
         };
         maxPosition = paddleTranslationX - ballSize;
+
+        for (AbstractPowerUp abstractPowerUp : powerupsActive) {
+            abstractPowerUp.undoAction();
+        }
+        powerupsActive.clear();
+        visiblePowerup = null;
     }
 
     private void drawMenu() {
@@ -569,5 +620,22 @@ public class SokobanGame extends Game {
         return true;
     }
 
+    public boolean shouldSpawn() {
+        if(frame <= 150) {
+            return false;
+        }
+        if(visiblePowerup != null) {
+            return false;
+        }
+        if(spawnFrame == 0) {
+            spawnFrame = MathHelper.randomInt(frame+1, frame+150);
+            return false;
+        }
+        if(frame == spawnFrame) {
+            spawnFrame = 0;
+            return true;
+        }
+        return false;
+    }
 
 }

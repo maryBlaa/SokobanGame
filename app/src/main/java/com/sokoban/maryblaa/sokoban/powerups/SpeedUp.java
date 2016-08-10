@@ -5,9 +5,9 @@ import com.sokoban.maryblaa.sokoban.SokobanGame;
 /**
  * Created by DragooNick on 05.07.2016.
  */
-public class BallEnlarger extends AbstractPowerUp {
+public class SpeedUp extends AbstractPowerUp {
 
-    public BallEnlarger(SokobanGame game) {
+    public SpeedUp(SokobanGame game) {
         super(game);    // Congratulations
     }
 
