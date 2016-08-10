@@ -12,6 +12,10 @@ public class MathHelper {
     }
 
     public static int randomInt(int min, int max) {
-        return min + (int) (Math.random() * (max-min));
+        return min + (int) (Math.random() * (max - min));
+    }
+
+    public static int randomInt(double min, double max) {
+        return randomInt((int) min, (int) max);
     }
 }

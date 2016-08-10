@@ -70,9 +70,9 @@ public class SokobanGame extends Game {
 
     private static GameState state = GameState.PRESTART;
 
-    private List<AbstractPowerUp> powerupsActive = new ArrayList<>();
+    public List<AbstractPowerUp> powerupsActive = new ArrayList<>();
 
-    private AbstractPowerUp visiblePowerup = null;
+    public AbstractPowerUp visiblePowerup = null;
     private int spawnFrame = 0;
 
     public HashMap<AbstractPowerUp.PowerupType, Mesh> powerupMeshes;
@@ -418,8 +418,8 @@ public class SokobanGame extends Game {
     }
 
     float maxPosition = paddleTranslationX - ballSize;
-    float ballPositionX = 0;
-    float ballPositionY = 0;
+    public float ballPositionX = 0;
+    public float ballPositionY = 0;
     float ballAngle = getBallStartPosition();
     boolean collisionDetectionActive = true;
 
@@ -444,6 +444,7 @@ public class SokobanGame extends Game {
 
         float distance;
 
+        // Collisiondetection Paddle Ball
         if (state == GameState.PLAYING) {
             ballPositionX += speed * Math.sin(Math.toRadians(ballAngle));
             ballPositionY += speed * Math.cos(Math.toRadians(ballAngle));
@@ -506,6 +507,12 @@ public class SokobanGame extends Game {
             visiblePowerup = AbstractPowerUp.spawn(this);
         }
         if (visiblePowerup != null) {
+
+            if(visiblePowerup.catchPowerUp()) {
+                powerupsActive.add(visiblePowerup);
+                visiblePowerup = null;
+            }
+
             if(visiblePowerup.despawnFrame >= frame) {
                 visiblePowerup.draw();
             } else {
