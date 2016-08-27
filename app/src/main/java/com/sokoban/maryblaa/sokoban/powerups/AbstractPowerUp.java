@@ -117,7 +117,7 @@ public abstract class AbstractPowerUp {
 
         double distance = Math.sqrt(Math.pow(distanceX, 2) + Math.pow(distanceY, 2));
 
-        boolean isCaught = distance < SokobanGame.ballSize + powerUpSize;
+        boolean isCaught = distance < game.ballSize + powerUpSize;
         if(isCaught) {
             powerDownFrame = game.frame + LIFETIME;
         }

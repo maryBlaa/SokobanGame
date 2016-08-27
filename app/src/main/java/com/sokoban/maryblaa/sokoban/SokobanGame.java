@@ -26,6 +26,7 @@ import com.sokoban.maryblaa.sokoban.powerups.Blink;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 
@@ -90,6 +91,7 @@ public class SokobanGame extends Game {
 
     public boolean isBallBlinking = false;
     public int blinkStartFrame = 0;
+    public long startTime;
 
     private enum GameState {
         PRESTART, PLAYING, PAUSED, GAMEOVER;
@@ -261,8 +263,6 @@ public class SokobanGame extends Game {
 
             switch (inputEvent.getDevice()) {
                 case KEYBOARD:
-                    Log.d(TAG, "KEYBOARD");
-                    Log.d(TAG, "" + inputEvent.getAction().toString());
                     switch (inputEvent.getAction()) {
 
                         case DOWN:
@@ -325,6 +325,8 @@ public class SokobanGame extends Game {
 
             case PRESTART:
                 state = GameState.PLAYING;
+                startTime = Calendar.getInstance().getTimeInMillis();
+                Log.d(TAG, "starttime: " + startTime);
                 frame = 0;
                 spawnFrame = 0;
                 break;
@@ -337,9 +339,11 @@ public class SokobanGame extends Game {
                 break;
             case PAUSED:
                 state = GameState.PLAYING;
+                startTime = Calendar.getInstance().getTimeInMillis();
                 break;
             case GAMEOVER:
                 state = GameState.PLAYING;
+                startTime = Calendar.getInstance().getTimeInMillis();
                 break;
         }
 
@@ -441,10 +445,15 @@ public class SokobanGame extends Game {
     public float speed = 15f;
 
     private void drawGame() {
+        long deltaTime = 0;
         if (state == GameState.PLAYING) {
             frame++;
+            deltaTime = Calendar.getInstance().getTimeInMillis() - startTime;
+
+            if (deltaTime > 0) {
+                Log.d(TAG, "" + (frame *1000 / deltaTime));
+            }
         }
-//        System.out.println(frame);
 
         float distance;
 
