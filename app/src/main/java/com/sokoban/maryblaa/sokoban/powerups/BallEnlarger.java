@@ -21,5 +21,6 @@ public class BallEnlarger extends AbstractPowerUp {
     @Override
     public void undoAction() {
         game.ballSize -= BALLSIZE;
+
     }
 }

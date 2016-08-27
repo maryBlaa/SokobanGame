@@ -35,12 +35,11 @@ public abstract class AbstractPowerUp {
     Texture texture;
     Matrix4x4 position;
     public float powerUpSize = 50f;
+    public static final int LIFETIME = 15 * 30;
     public float powerUpPositionX;
     public float powerUpPositionY;
-    public float speed;
-    public float powerUpAngle;
     public int despawnFrame;
-    public int powerUpTime;
+    public int powerDownFrame;
     private Mesh meshPowerUp;
     private Material materialPowerUp;
     protected PowerupType type;
@@ -118,6 +117,15 @@ public abstract class AbstractPowerUp {
 
         double distance = Math.sqrt(Math.pow(distanceX, 2) + Math.pow(distanceY, 2));
 
-        return distance < SokobanGame.ballSize + powerUpSize;
+        boolean isCaught = distance < SokobanGame.ballSize + powerUpSize;
+        if(isCaught) {
+            powerDownFrame = game.frame + LIFETIME;
+        }
+        return isCaught;
+    }
+
+    protected int paddleIndex;
+    protected int getPaddleIndex() {
+        return game.ballAngle > 180 ? 1 : 0;
     }
 }

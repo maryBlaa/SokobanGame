@@ -11,15 +11,15 @@ public class SpeedUp extends AbstractPowerUp {
         super(game);    // Congratulations
     }
 
-    private static final float SPEEDUP = 10;
+    private static final float SPEEDUP = 1.5f;
 
     @Override
     public void performAction() {
-        game.speed += SPEEDUP;
+        game.speed *= SPEEDUP;
     }
 
     @Override
     public void undoAction() {
-        game.speed -= SPEEDUP;
+        game.speed /= SPEEDUP;
     }
 }

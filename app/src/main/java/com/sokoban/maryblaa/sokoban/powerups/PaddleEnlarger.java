@@ -15,11 +15,14 @@ public class PaddleEnlarger extends AbstractPowerUp {
 
     @Override
     public void performAction() {
-        game.paddleSize += PADDLESIZE;
+        paddleIndex = getPaddleIndex();
+        game.paddleSizes[paddleIndex] += PADDLESIZE;
+        game.calculateWorldPaddle(paddleIndex);
     }
 
     @Override
     public void undoAction() {
-        game.paddleSize -= PADDLESIZE;
+        game.paddleSizes[paddleIndex] -= PADDLESIZE;
+        game.calculateWorldPaddle(paddleIndex);
     }
 }

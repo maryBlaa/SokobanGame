@@ -13,11 +13,12 @@ public class PaddleDirectionInverser extends AbstractPowerUp {
 
     @Override
     public void performAction() {
-        game.paddleInverse = true;
+        paddleIndex = getPaddleIndex();
+        game.paddleInverse[paddleIndex] = true;
     }
 
     @Override
     public void undoAction() {
-        game.paddleInverse = false;
+        game.paddleInverse[paddleIndex] = false;
     }
 }
