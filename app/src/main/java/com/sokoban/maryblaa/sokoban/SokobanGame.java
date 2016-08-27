@@ -44,7 +44,7 @@ public class SokobanGame extends Game {
     private static final int MAX_DELAY_BETWEEN_POWERUPS = 3000;
     // base speed: 2000ms for largest width
     public static int BASE_SPEED = 2000;
-
+    public int MAX_MATCHPOINTS = 5;
 
     private Camera hudCamera, sceneCamera;
     private Mesh meshBall, meshPaddle;
@@ -58,7 +58,6 @@ public class SokobanGame extends Game {
     private Matrix4x4 posTitle;
     private TextBuffer[] textMenu;
     private Matrix4x4[] posMenu;
-    private boolean showMenu = true;
     public int screenHeight;
     public int screenWidth;
     public int largestWidth;
@@ -80,7 +79,8 @@ public class SokobanGame extends Game {
 
     private boolean introPlayed = false;
 
-    private static GameState state = GameState.PRESTART;
+    private static Screen screen = Screen.MENU;
+    private static GameState gameState = GameState.PRESTART;
 
     public List<AbstractPowerUp> powerupsActive = new ArrayList<>();
 
@@ -102,6 +102,9 @@ public class SokobanGame extends Game {
     private SpriteFont fontTimeCounter;
     private TextBuffer textTimeCounter;
 
+    private SpriteFont fontScore;
+    private TextBuffer textScore;
+
     public int frame = 0;
     public double speedVariation = 1;
 
@@ -110,9 +113,11 @@ public class SokobanGame extends Game {
     private int pauseDeltaTime;
     private double fpms = 0.03;
 
+    public int scoreP1 = 0;
+    public int scoreP2 = 0;
 
     private enum GameState {
-        PRESTART, PLAYING, PAUSED, GAMEOVER;
+        PRESTART, PLAYING, PAUSED, MATCHPOINT, GAMEOVER;
 
     }
 
@@ -131,7 +136,7 @@ public class SokobanGame extends Game {
         }
 
         private boolean isVisible() {
-            return this != RESUME || state == GameState.PAUSED;
+            return this != RESUME || gameState == GameState.PAUSED;
         }
     }
 
@@ -239,8 +244,8 @@ public class SokobanGame extends Game {
         fontTimeCounter = graphicsDevice.createSpriteFont(null, 120);
         textTimeCounter = graphicsDevice.createTextBuffer(fontTimeCounter, 16);
 
-
-
+        fontScore = graphicsDevice.createSpriteFont(null, 120);
+        textScore = graphicsDevice.createTextBuffer(fontScore, 16);
 
         for (int i = 0; i < MenuEntry.values().length; i++) {
             textMenu[i] = graphicsDevice.createTextBuffer(fontMenu, 50);
@@ -291,7 +296,7 @@ public class SokobanGame extends Game {
                         case DOWN:
                             switch (inputEvent.getKeycode()) {
                                 case KeyEvent.KEYCODE_MENU:
-                                    showMenu = !showMenu;
+                                    screen = Screen.MENU;
                                     break;
                                 case KeyEvent.KEYCODE_BACK:
                                     onBackPressed();
@@ -319,7 +324,7 @@ public class SokobanGame extends Game {
                     switch (inputEvent.getAction()) {
                         case DOWN:
 
-                            if (showMenu) {
+                            if (screen == Screen.MENU) {
                                 detectMenuTouch(touchPoint);
                             } else {
                                 detectPaddleTouchDown(touchPoint);
@@ -328,7 +333,7 @@ public class SokobanGame extends Game {
 
                             break;
                         case MOVE:
-                            if (!showMenu) {
+                            if (screen == Screen.GAME) {
                                 detectPaddleTouchMove(touchPoint);
                             }
 
@@ -344,10 +349,10 @@ public class SokobanGame extends Game {
 
     private void detectPaddleTouchDown(Point touchPoint) {
 
-        switch (state) {
+        switch (gameState) {
 
             case PRESTART:
-                state = GameState.PLAYING;
+                gameState = GameState.PLAYING;
                 resetDeltaTimeCounter();
                 spawnDeltaTime = 0;
                 break;
@@ -359,13 +364,29 @@ public class SokobanGame extends Game {
                 paddleFingerPosition[index] = y - paddlePositions[index];
                 break;
             case PAUSED:
-                state = GameState.PLAYING;
+                gameState = GameState.PLAYING;
                 pauseDeltaTimeCounter();
                 break;
+            case MATCHPOINT:
+                if (scoreP1 < MAX_MATCHPOINTS && scoreP2 < MAX_MATCHPOINTS) {
+                    gameState = GameState.PLAYING;
+                    resetDeltaTimeCounter();
+                    spawnDeltaTime = 0;
+                    break;
+                } else {
+                    gameState = GameState.GAMEOVER;
+                    break;
+                }
             case GAMEOVER:
-                state = GameState.PLAYING;
-                resetDeltaTimeCounter();
-                spawnDeltaTime = 0;
+                int winner;
+                if (scoreP1 > scoreP2) {
+                    winner = 1;
+                } else {
+                    winner = 2;
+                }
+                Log.d(TAG, "GAMEOVER: PLAYER " + winner + " won!");
+                resetScore();
+                screen = Screen.MENU;
                 break;
         }
 
@@ -384,7 +405,7 @@ public class SokobanGame extends Game {
 
     private void detectPaddleTouchMove(Point touchPoint) {
 
-        if (state != GameState.PLAYING) {
+        if (gameState != GameState.PLAYING) {
             return;
         }
 
@@ -427,13 +448,14 @@ public class SokobanGame extends Game {
         }
         switch (entry) {
             case RESUME:
-                showMenu = !showMenu;
-                state = GameState.PAUSED;
+                screen = Screen.GAME;
+                gameState = GameState.PAUSED;
                 break;
             case NEWGAME:
                 resetPositions();
-                showMenu = !showMenu;
-                state = GameState.PRESTART;
+                resetScore();
+                screen = Screen.GAME;
+                gameState = GameState.PRESTART;
                 miau.start();
                 break;
             case OPTIONS:
@@ -450,17 +472,28 @@ public class SokobanGame extends Game {
 
     }
 
+    private void resetScore() {
+        scoreP1 = 0;
+        scoreP2 = 0;
+    }
+
     @Override
     public void draw(float deltaSeconds) {
         graphicsDevice.clear(0.0f, 0.5f, 1.0f, 1.0f, 1.0f);
 
         graphicsDevice.setCamera(sceneCamera);
 
-        if (showMenu) {
-            // Text auf dem HUD zeichnen
-            drawMenu();
-        } else {
-            drawGame();
+        switch (screen) {
+            case MENU:
+                drawMenu();
+                break;
+            case GAME:
+                drawGame();
+                break;
+            case HIGHSCORE:
+                break;
+            case CREDITS:
+                break;
         }
     }
 
@@ -483,7 +516,7 @@ public class SokobanGame extends Game {
     private void drawGame() {
         currentDeltaTime = getDeltaTime();
 
-        if (state == GameState.PLAYING) {
+        if (gameState == GameState.PLAYING) {
             frame++;
 
             if (currentDeltaTime > 0) {
@@ -497,7 +530,7 @@ public class SokobanGame extends Game {
         float distance;
 
         // Collisiondetection Paddle Ball
-        if (state == GameState.PLAYING) {
+        if (gameState == GameState.PLAYING) {
             double speed = speedVariation * (largestWidth / (fpms * BASE_SPEED));
             ballPositionX += speed * Math.sin(Math.toRadians(ballAngle));
             ballPositionY += speed * Math.cos(Math.toRadians(ballAngle));
@@ -505,7 +538,8 @@ public class SokobanGame extends Game {
                 // right Paddle
                 distance = ballPositionY - paddlePositions[1];
                 if (Math.abs(distance) > paddleSizes[1]) {
-                    setGameoverState();
+                    scoreP1 += 1;
+                    setMatchpointState();
                     return;
                 } else {
                     turnAround(distance, false);
@@ -519,7 +553,8 @@ public class SokobanGame extends Game {
                 // left Paddle
                 distance = ballPositionY - paddlePositions[0];
                 if (Math.abs(distance) > paddleSizes[0]) {
-                    setGameoverState();
+                    scoreP2 += 1;
+                    setMatchpointState();
                     return;
                 } else {
                     turnAround(distance, true);
@@ -553,9 +588,42 @@ public class SokobanGame extends Game {
                     bounce3.start();
                 }
             }
+            drawPowerUp();
+            removeExpiredPowerUp();
+        } else if (gameState == GameState.GAMEOVER) {
+            drawGameover();
+        } else {
+            textScore.setText(scoreP1 + " : " + scoreP2);
+            renderer.drawText(textScore, posTitle);
         }
 
-        // draw PowerUp
+        // draw Ball
+        boolean shouldDrawBall = !isBallBlinking || ((currentDeltaTime - blinkStartDeltaTime) % Blink.BLINK_DURATION_MS) > Blink.BLINK_DURATION_MS/2;
+        if(shouldDrawBall) {
+            worldBall = Matrix4x4.createTranslation(ballPositionX, ballPositionY, 0).scale(ballSize);
+            renderer.drawMesh(meshBall, materialBall, worldBall);
+        }
+
+        // draw Paddles
+        for (Matrix4x4 worldPaddle : worldPaddles) {
+            renderer.drawMesh(meshPaddle, materialPaddle, worldPaddle);
+        }
+    }
+
+    private void removeExpiredPowerUp() {
+        AbstractPowerUp toBeDeleted = null;
+        for (AbstractPowerUp abstractPowerUp : powerupsActive) {
+            if(abstractPowerUp.powerDownDeltaTime <= currentDeltaTime) {
+                abstractPowerUp.undoAction();
+                toBeDeleted = abstractPowerUp;
+            }
+        }
+        if(toBeDeleted != null) {
+            powerupsActive.remove(toBeDeleted);
+        }
+    }
+
+    private void drawPowerUp() {
         if (shouldSpawn()) {
             visiblePowerup = AbstractPowerUp.spawn(this);
         }
@@ -574,32 +642,11 @@ public class SokobanGame extends Game {
             }
 
         }
+    }
 
-        // remove expired powerups
-        AbstractPowerUp toBeDeleted = null;
-        for (AbstractPowerUp abstractPowerUp : powerupsActive) {
-            if(abstractPowerUp.powerDownDeltaTime <= currentDeltaTime) {
-                abstractPowerUp.undoAction();
-                toBeDeleted = abstractPowerUp;
-            }
-        }
-        if(toBeDeleted != null) {
-            powerupsActive.remove(toBeDeleted);
-        }
-
-        // draw Ball
-        boolean shouldDrawBall = !isBallBlinking || ((currentDeltaTime - blinkStartDeltaTime) % Blink.BLINK_DURATION_MS) > Blink.BLINK_DURATION_MS/2;
-        if(shouldDrawBall) {
-            worldBall = Matrix4x4.createTranslation(ballPositionX, ballPositionY, 0).scale(ballSize);
-            renderer.drawMesh(meshBall, materialBall, worldBall);
-        }
-
-
-        // draw Paddles
-        for (Matrix4x4 worldPaddle : worldPaddles) {
-            renderer.drawMesh(meshPaddle, materialPaddle, worldPaddle);
-        }
-
+    private void drawGameover() {
+        graphicsDevice.setCamera(hudCamera);
+        renderer.drawText(textTitle, posTitle);
     }
 
     private void turnAround(float distance, boolean isLeft) {
@@ -623,13 +670,13 @@ public class SokobanGame extends Game {
         }
     }
 
-    private void setGameoverState() {
+    private void setMatchpointState() {
         if (ooooooooh.isPlaying()) {
             ooooooooh.seekTo(0);
         } else {
             ooooooooh.start();
         }
-        state = GameState.GAMEOVER;
+        gameState = GameState.MATCHPOINT;
         resetPositions();
     }
 
@@ -700,12 +747,12 @@ public class SokobanGame extends Game {
     }
 
     public boolean onBackPressed() {
-        if (showMenu) {
+        if (screen == Screen.MENU) {
             parseMenuEntry(MenuEntry.QUIT);
         } else {
             pauseDeltaTime = getDeltaTime();
-            state = GameState.PAUSED;
-            showMenu = true;
+            gameState = GameState.PAUSED;
+            screen = Screen.MENU;
         }
 
         return true;
