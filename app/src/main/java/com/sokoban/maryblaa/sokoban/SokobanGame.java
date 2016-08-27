@@ -39,6 +39,13 @@ public class SokobanGame extends Game {
 
     public static final String TAG = SokobanGame.class.getSimpleName();
 
+    private static final int MIN_DELAY_UNTIL_POWERUP = 3000;
+    private static final int MIN_DELAY_BETWEEN_POWERUPS = 1500;
+    private static final int MAX_DELAY_BETWEEN_POWERUPS = 3000;
+    // base speed: 2000ms for largest width
+    public static int BASE_SPEED = 2000;
+
+
     private Camera hudCamera, sceneCamera;
     private Mesh meshBall, meshPaddle;
     private Texture texBall, texPaddle;
@@ -54,6 +61,7 @@ public class SokobanGame extends Game {
     private boolean showMenu = true;
     public int screenHeight;
     public int screenWidth;
+    public int largestWidth;
     private AABB[] aabbMenu;
     private float paddleTranslationX = 400f;
     public static float paddleSizeDefault = 200f;
@@ -77,7 +85,7 @@ public class SokobanGame extends Game {
     public List<AbstractPowerUp> powerupsActive = new ArrayList<>();
 
     public AbstractPowerUp visiblePowerup = null;
-    private int spawnFrame = 0;
+    private int spawnDeltaTime = 0;
 
     public HashMap<AbstractPowerUp.PowerupType, Mesh> powerupMeshes;
     public HashMap<AbstractPowerUp.PowerupType, Material> powerupMaterials;
@@ -90,8 +98,18 @@ public class SokobanGame extends Game {
     boolean collisionDetectionActive = true;
 
     public boolean isBallBlinking = false;
-    public int blinkStartFrame = 0;
+    public int blinkStartDeltaTime = 0;
+    private SpriteFont fontTimeCounter;
+    private TextBuffer textTimeCounter;
+
+    public int frame = 0;
+    public double speedVariation = 1;
+
     public long startTime;
+    public int currentDeltaTime;
+    private int pauseDeltaTime;
+    private double fpms = 0.03;
+
 
     private enum GameState {
         PRESTART, PLAYING, PAUSED, GAMEOVER;
@@ -189,8 +207,6 @@ public class SokobanGame extends Game {
         }
     }
 
-    public int frame = 0;
-
     @Override
     public void loadContent() {
         try {
@@ -219,6 +235,12 @@ public class SokobanGame extends Game {
 
         textTitle = graphicsDevice.createTextBuffer(fontTitle, 50);
         textMenu = new TextBuffer[MenuEntry.values().length];
+
+        fontTimeCounter = graphicsDevice.createSpriteFont(null, 120);
+        textTimeCounter = graphicsDevice.createTextBuffer(fontTimeCounter, 16);
+
+
+
 
         for (int i = 0; i < MenuEntry.values().length; i++) {
             textMenu[i] = graphicsDevice.createTextBuffer(fontMenu, 50);
@@ -251,6 +273,7 @@ public class SokobanGame extends Game {
 
         screenWidth = width;
         screenHeight = height;
+        largestWidth = screenWidth > screenHeight ? screenWidth : screenHeight;
         paddleTranslationX = width / 2 - paddleSizeDefault / 5;
         resetPositions();
     }
@@ -325,10 +348,8 @@ public class SokobanGame extends Game {
 
             case PRESTART:
                 state = GameState.PLAYING;
-                startTime = Calendar.getInstance().getTimeInMillis();
-                Log.d(TAG, "starttime: " + startTime);
-                frame = 0;
-                spawnFrame = 0;
+                resetDeltaTimeCounter();
+                spawnDeltaTime = 0;
                 break;
             case PLAYING:
                 float x = touchPoint.getPosition().getX();
@@ -339,15 +360,26 @@ public class SokobanGame extends Game {
                 break;
             case PAUSED:
                 state = GameState.PLAYING;
-                startTime = Calendar.getInstance().getTimeInMillis();
+                pauseDeltaTimeCounter();
                 break;
             case GAMEOVER:
                 state = GameState.PLAYING;
-                startTime = Calendar.getInstance().getTimeInMillis();
+                resetDeltaTimeCounter();
+                spawnDeltaTime = 0;
                 break;
         }
 
 
+    }
+
+    private void resetDeltaTimeCounter() {
+        startTime = Calendar.getInstance().getTimeInMillis();
+        frame = 0;
+    }
+
+    private void pauseDeltaTimeCounter() {
+        startTime = Calendar.getInstance().getTimeInMillis() - pauseDeltaTime;
+        pauseDeltaTime = 0;
     }
 
     private void detectPaddleTouchMove(Point touchPoint) {
@@ -396,11 +428,12 @@ public class SokobanGame extends Game {
         switch (entry) {
             case RESUME:
                 showMenu = !showMenu;
-                state = GameState.PRESTART;
+                state = GameState.PAUSED;
                 break;
             case NEWGAME:
                 resetPositions();
                 showMenu = !showMenu;
+                state = GameState.PRESTART;
                 miau.start();
                 break;
             case OPTIONS:
@@ -442,23 +475,30 @@ public class SokobanGame extends Game {
         return (float) random;
     }
 
-    public float speed = 15f;
+    private int getDeltaTime() {
+        return (int) (Calendar.getInstance().getTimeInMillis() - startTime);
+    }
+
 
     private void drawGame() {
-        long deltaTime = 0;
+        currentDeltaTime = getDeltaTime();
+
         if (state == GameState.PLAYING) {
             frame++;
-            deltaTime = Calendar.getInstance().getTimeInMillis() - startTime;
 
-            if (deltaTime > 0) {
-                Log.d(TAG, "" + (frame *1000 / deltaTime));
+            if (currentDeltaTime > 0) {
+                fpms = frame / ((double) currentDeltaTime);
             }
+
+            textTimeCounter.setText((currentDeltaTime / 1000) + "s, " + (int) (fpms * 1000) + " fps");
+            renderer.drawText(textTimeCounter, posTitle);
         }
 
         float distance;
 
         // Collisiondetection Paddle Ball
         if (state == GameState.PLAYING) {
+            double speed = speedVariation * (largestWidth / (fpms * BASE_SPEED));
             ballPositionX += speed * Math.sin(Math.toRadians(ballAngle));
             ballPositionY += speed * Math.cos(Math.toRadians(ballAngle));
             if (ballPositionX > maxPosition + paddleSizes[1] * 0.2) {
@@ -526,7 +566,7 @@ public class SokobanGame extends Game {
                 visiblePowerup.performAction();
                 visiblePowerup = null;
             } else {
-                if (visiblePowerup.despawnFrame >= frame) {
+                if (visiblePowerup.despawnDeltaTime >= currentDeltaTime) {
                     visiblePowerup.draw();
                 } else {
                     visiblePowerup = null;
@@ -538,7 +578,7 @@ public class SokobanGame extends Game {
         // remove expired powerups
         AbstractPowerUp toBeDeleted = null;
         for (AbstractPowerUp abstractPowerUp : powerupsActive) {
-            if(abstractPowerUp.powerDownFrame <= frame) {
+            if(abstractPowerUp.powerDownDeltaTime <= currentDeltaTime) {
                 abstractPowerUp.undoAction();
                 toBeDeleted = abstractPowerUp;
             }
@@ -548,7 +588,7 @@ public class SokobanGame extends Game {
         }
 
         // draw Ball
-        boolean shouldDrawBall = !isBallBlinking || ((frame - blinkStartFrame) % (2 * Blink.BLINK_FRAME_RATE)) > 14;
+        boolean shouldDrawBall = !isBallBlinking || ((currentDeltaTime - blinkStartDeltaTime) % Blink.BLINK_DURATION_MS) > Blink.BLINK_DURATION_MS/2;
         if(shouldDrawBall) {
             worldBall = Matrix4x4.createTranslation(ballPositionX, ballPositionY, 0).scale(ballSize);
             renderer.drawMesh(meshBall, materialBall, worldBall);
@@ -559,6 +599,7 @@ public class SokobanGame extends Game {
         for (Matrix4x4 worldPaddle : worldPaddles) {
             renderer.drawMesh(meshPaddle, materialPaddle, worldPaddle);
         }
+
     }
 
     private void turnAround(float distance, boolean isLeft) {
@@ -662,6 +703,7 @@ public class SokobanGame extends Game {
         if (showMenu) {
             parseMenuEntry(MenuEntry.QUIT);
         } else {
+            pauseDeltaTime = getDeltaTime();
             state = GameState.PAUSED;
             showMenu = true;
         }
@@ -670,18 +712,18 @@ public class SokobanGame extends Game {
     }
 
     public boolean shouldSpawn() {
-        if (frame <= 150) {
+        if (currentDeltaTime <= MIN_DELAY_UNTIL_POWERUP) {
             return false;
         }
         if (visiblePowerup != null) {
             return false;
         }
-        if (spawnFrame == 0) {
-            spawnFrame = MathHelper.randomInt(frame + 1, frame + 150);
+        if (spawnDeltaTime == 0) {
+            spawnDeltaTime = MathHelper.randomInt(currentDeltaTime + MIN_DELAY_BETWEEN_POWERUPS, currentDeltaTime + MAX_DELAY_BETWEEN_POWERUPS);
             return false;
         }
-        if (frame == spawnFrame) {
-            spawnFrame = 0;
+        if (currentDeltaTime >= spawnDeltaTime) {
+            spawnDeltaTime = 0;
             return true;
         }
         return false;

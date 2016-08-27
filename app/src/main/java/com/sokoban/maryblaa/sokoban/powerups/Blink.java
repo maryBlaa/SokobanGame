@@ -1,7 +1,5 @@
 package com.sokoban.maryblaa.sokoban.powerups;
 
-import android.util.Log;
-
 import com.sokoban.maryblaa.sokoban.SokobanGame;
 
 /**
@@ -9,7 +7,8 @@ import com.sokoban.maryblaa.sokoban.SokobanGame;
  */
 public class Blink extends AbstractPowerUp {
 
-    public static final int BLINK_FRAME_RATE = 15;
+    // Blinks per second
+    public static final int BLINK_DURATION_MS = 589;
 
     public Blink(SokobanGame game) {
         super(game);    // Congratulations
@@ -17,9 +16,8 @@ public class Blink extends AbstractPowerUp {
 
     @Override
     public void performAction() {
-        Log.d(getClass().getSimpleName(), "JEEEEEEEETZT");
         game.isBallBlinking = true;
-        game.blinkStartFrame = game.frame;
+        game.blinkStartDeltaTime = game.currentDeltaTime;
     }
 
     @Override

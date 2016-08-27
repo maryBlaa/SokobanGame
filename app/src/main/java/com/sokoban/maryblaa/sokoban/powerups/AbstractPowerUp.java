@@ -32,14 +32,18 @@ public abstract class AbstractPowerUp {
         }
     }
 
+    public static final int LIFETIME_MS = 15000;
+    public static final int DISPLAYTIME_MIN_MS = 5000;
+    public static final int DISPLAYTIME_MAX_MS = 10000;
+
+
     Texture texture;
     Matrix4x4 position;
     public float powerUpSize = 50f;
-    public static final int LIFETIME = 15 * 30;
     public float powerUpPositionX;
     public float powerUpPositionY;
-    public int despawnFrame;
-    public int powerDownFrame;
+    public int despawnDeltaTime;
+    public int powerDownDeltaTime;
     private Mesh meshPowerUp;
     private Material materialPowerUp;
     protected PowerupType type;
@@ -97,8 +101,8 @@ public abstract class AbstractPowerUp {
         materialPowerUp = game.powerupMaterials.get(type);
         meshPowerUp = game.powerupMeshes.get(type);
 
-        int displayTime = MathHelper.randomInt(150, 350);
-        despawnFrame = displayTime + game.frame;
+        int displayTime = MathHelper.randomInt(DISPLAYTIME_MIN_MS, DISPLAYTIME_MAX_MS);
+        despawnDeltaTime = game.currentDeltaTime + displayTime;
 
         powerUpPositionY = MathHelper.randomInt(game.screenHeight * -0.45, game.screenHeight * 0.45);
         powerUpPositionX = MathHelper.randomInt(game.screenWidth * -0.4, game.screenWidth * 0.4);
@@ -119,7 +123,7 @@ public abstract class AbstractPowerUp {
 
         boolean isCaught = distance < game.ballSize + powerUpSize;
         if(isCaught) {
-            powerDownFrame = game.frame + LIFETIME;
+            powerDownDeltaTime = game.currentDeltaTime + LIFETIME_MS;
         }
         return isCaught;
     }

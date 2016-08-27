@@ -15,11 +15,11 @@ public class SpeedUp extends AbstractPowerUp {
 
     @Override
     public void performAction() {
-        game.speed *= SPEEDUP;
+        game.speedVariation *= SPEEDUP;
     }
 
     @Override
     public void undoAction() {
-        game.speed /= SPEEDUP;
+        game.speedVariation /= SPEEDUP;
     }
 }
