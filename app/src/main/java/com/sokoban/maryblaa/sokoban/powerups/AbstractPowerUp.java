@@ -132,7 +132,13 @@ public abstract class AbstractPowerUp {
         game.renderer.drawMesh(meshPowerUp, materialPowerUp, worldPowerUp);
     };
 
+    // distance between centerns (ball and power up) has to be smaller than added radii (it's real, you can google it)
     public boolean catchPowerUp() {
-        return game.ballPositionX == powerUpPositionX && game.ballPositionY == powerUpPositionY;
+        double distanceX = game.ballPositionX - powerUpPositionX;
+        double distanceY = game.ballPositionY - powerUpPositionY;
+
+        double distance = Math.sqrt(Math.pow(distanceX, 2) + Math.pow(distanceY, 2));
+
+        return distance < SokobanGame.ballSize + powerUpSize;
     }
 }

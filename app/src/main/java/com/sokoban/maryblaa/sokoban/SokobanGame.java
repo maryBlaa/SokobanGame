@@ -55,7 +55,7 @@ public class SokobanGame extends Game {
     private AABB[] aabbMenu;
     private float paddleTranslationX = 400f;
     private static final float paddleSize = 200f;
-    private static final float ballSize = 70f;
+    public static float ballSize = 70f;
 
     private float[] paddlePositions = new float[]{0, 0};
     private float[] paddleFingerPosition = new float[]{0, 0};
@@ -511,13 +511,14 @@ public class SokobanGame extends Game {
             if(visiblePowerup.catchPowerUp()) {
                 powerupsActive.add(visiblePowerup);
                 visiblePowerup = null;
+            } else {
+                if(visiblePowerup.despawnFrame >= frame) {
+                    visiblePowerup.draw();
+                } else {
+                    visiblePowerup = null;
+                }
             }
 
-            if(visiblePowerup.despawnFrame >= frame) {
-                visiblePowerup.draw();
-            } else {
-                visiblePowerup = null;
-            }
         }
 
         // Ball zeichnen
