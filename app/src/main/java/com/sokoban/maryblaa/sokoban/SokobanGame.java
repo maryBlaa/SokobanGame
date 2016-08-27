@@ -22,6 +22,7 @@ import com.sokoban.maryblaa.sokoban.math.Matrix4x4;
 import com.sokoban.maryblaa.sokoban.math.Vector3;
 import com.sokoban.maryblaa.sokoban.powerups.AbstractPowerUp;
 import com.sokoban.maryblaa.sokoban.powerups.Blink;
+import com.sokoban.maryblaa.sokoban.utils.Prefs;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -414,6 +415,9 @@ public class SokobanGame extends Game {
                 } else {
                     winner = 2;
                 }
+                Prefs.setInt(Prefs.PLAYER1, scoreP1);
+                Prefs.setInt(Prefs.PLAYER2, scoreP2);
+
                 resetScore();
                 screen = Screen.MENU;
                 break;
@@ -778,6 +782,8 @@ public class SokobanGame extends Game {
     private void drawHighscore() {
         textTitle.setText("Highscore");
         renderer.drawText(textTitle, posTitle);
+
+        Log.d(TAG, "Last scores: P1: " + Prefs.getInt(Prefs.PLAYER1, 0) + ", P2: " + Prefs.getInt(Prefs.PLAYER2, 0));
     }
 
     private void drawCredits() {
