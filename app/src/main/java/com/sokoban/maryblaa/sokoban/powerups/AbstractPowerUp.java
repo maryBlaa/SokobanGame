@@ -89,7 +89,7 @@ public abstract class AbstractPowerUp {
 
     }
 
-    private SokobanGame game;
+    protected SokobanGame game;
 
     public AbstractPowerUp(SokobanGame game) {
         this.game = game;
