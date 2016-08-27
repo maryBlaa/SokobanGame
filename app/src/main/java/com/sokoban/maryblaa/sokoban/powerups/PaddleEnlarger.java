@@ -7,17 +7,19 @@ import com.sokoban.maryblaa.sokoban.SokobanGame;
  */
 public class PaddleEnlarger extends AbstractPowerUp {
 
+    private static final float PADDLESIZE = 25f;
+
     public PaddleEnlarger(SokobanGame game) {
         super(game);    // Congratulations
     }
 
     @Override
     public void performAction() {
-
+        game.paddleSize += PADDLESIZE;
     }
 
     @Override
     public void undoAction() {
-
+        game.paddleSize -= PADDLESIZE;
     }
 }

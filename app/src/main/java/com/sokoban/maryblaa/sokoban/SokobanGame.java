@@ -55,7 +55,8 @@ public class SokobanGame extends Game {
     public int screenWidth;
     private AABB[] aabbMenu;
     private float paddleTranslationX = 400f;
-    private static final float paddleSize = 200f;
+    public static float paddleSize = 200f;
+    public boolean paddleInverse = false;
     public static float ballSize = 70f;
 
     private float[] paddlePositions = new float[]{0, 0};
@@ -360,12 +361,17 @@ public class SokobanGame extends Game {
         int index = x < 0 ? 0 : 1;
 
         if (Math.abs(paddleFingerPosition[index]) < paddleSize) {
-            float newPosition = paddlePositions[index] + y - (paddlePositions[index] + paddleFingerPosition[index]);
-            if (Math.abs(newPosition) < screenHeight / 2 - paddleSize) {
-                paddlePositions[index] = newPosition;
+            float newPaddlePosition;
+            if(paddleInverse) {
+                newPaddlePosition = paddlePositions[index] - y - (paddlePositions[index] + paddleFingerPosition[index]);
+            } else {
+                newPaddlePosition = paddlePositions[index] + y - (paddlePositions[index] + paddleFingerPosition[index]);
+            }
+            if (Math.abs(newPaddlePosition) < screenHeight / 2 - paddleSize) {
+                paddlePositions[index] = newPaddlePosition;
                 worldPaddles[index] = Matrix4x4.createTranslation(
-                        (index == 0 ? -1 : 1) * paddleTranslationX,
-                        paddlePositions[index], 0
+                    (index == 0 ? -1 : 1) * paddleTranslationX,
+                    paddlePositions[index], 0
                 ).scale(paddleSize);
             }
         }
@@ -515,6 +521,7 @@ public class SokobanGame extends Game {
 
             if (visiblePowerup.catchPowerUp()) {
                 powerupsActive.add(visiblePowerup);
+                visiblePowerup.performAction();
                 visiblePowerup = null;
             } else {
                 if (visiblePowerup.despawnFrame >= frame) {
