@@ -52,7 +52,6 @@ public abstract class AbstractPowerUp {
         int powerupTypeIndex = MathHelper.randomInt(0, PowerupType.values().length - 1);
         PowerupType type = PowerupType.values()[powerupTypeIndex];
 
-
         AbstractPowerUp powerup;
         switch (type) {
 
