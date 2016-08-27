@@ -15,11 +15,11 @@ public class BallEnlarger extends AbstractPowerUp {
 
     @Override
     public void performAction() {
-        SokobanGame.ballSize += BALLSIZE;
+        game.ballSize += BALLSIZE;
     }
 
     @Override
     public void undoAction() {
-        SokobanGame.ballSize -= BALLSIZE;
+        game.ballSize -= BALLSIZE;
     }
 }

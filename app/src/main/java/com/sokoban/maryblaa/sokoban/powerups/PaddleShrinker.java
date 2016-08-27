@@ -15,11 +15,11 @@ public class PaddleShrinker extends AbstractPowerUp {
 
     @Override
     public void performAction() {
-        SokobanGame.paddleSize -= PADDLESIZE;
+        game.paddleSize -= PADDLESIZE;
     }
 
     @Override
     public void undoAction() {
-        SokobanGame.paddleSize += PADDLESIZE;
+        game.paddleSize += PADDLESIZE;
     }
 }
