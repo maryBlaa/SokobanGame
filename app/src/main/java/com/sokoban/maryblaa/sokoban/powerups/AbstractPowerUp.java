@@ -14,14 +14,14 @@ public abstract class AbstractPowerUp {
 
     public enum PowerupType {
 
-        BALLENLARGER ("ball.jpg", "ownBall.obj"),
-        PADDLEENLARGER ("ball.jpg", "ownBall.obj"),
-        BALLSHRINKER ("ball.jpg", "ownBall.obj"),
-        PADDLESHRINKER ("ball.jpg", "ownBall.obj"),
-        SPEEDUP ("ball.jpg", "ownBall.obj"),
-        SLOWDOWN ("ball.jpg", "ownBall.obj"),
-        BLINK ("ball.jpg", "ownBall.obj"),
-        PADDLEDIRECTIONINVERSER ("ball.jpg", "ownBall.obj");
+        BALLENLARGER("ball.jpg", "ownBall.obj"),
+        PADDLEENLARGER("ball.jpg", "ownBall.obj"),
+        BALLSHRINKER("ball.jpg", "ownBall.obj"),
+        PADDLESHRINKER("ball.jpg", "ownBall.obj"),
+        SPEEDUP("ball.jpg", "ownBall.obj"),
+        SLOWDOWN("ball.jpg", "ownBall.obj"),
+        BLINK("ball.jpg", "ownBall.obj"),
+        PADDLEDIRECTIONINVERSER("ball.jpg", "ownBall.obj");
 
         public String materialSrc;
         public String meshSrc;
@@ -54,7 +54,7 @@ public abstract class AbstractPowerUp {
 
 
         AbstractPowerUp powerup;
-        switch(type) {
+        switch (type) {
 
             case BALLENLARGER:
                 powerup = new BallEnlarger(game);
@@ -106,7 +106,7 @@ public abstract class AbstractPowerUp {
         powerUpPositionX = MathHelper.randomInt(game.screenWidth * -0.4, game.screenWidth * 0.4);
     }
 
-    public void draw(){
+    public void draw() {
 //        powerUpPositionX += speed * Math.sin(Math.toRadians(powerUpAngle));
 //        powerUpPositionY += speed * Math.cos(Math.toRadians(powerUpAngle));
 //
