@@ -230,14 +230,14 @@ public class SokobanGame extends Game {
             stream = context.getAssets().open("ownBall.obj");
             meshBall = Mesh.loadFromOBJ(stream);
 
-            stream = context.getAssets().open("ball.jpg");
+            stream = context.getAssets().open("football.jpg");
             texBall = graphicsDevice.createTexture(stream);
             materialBall.setTexture(texBall);
 
             stream = context.getAssets().open("ownPaddle.obj");
             meshPaddle = Mesh.loadFromOBJ(stream);
 
-            stream = context.getAssets().open("woodSmall.png");
+            stream = context.getAssets().open("wood1.jpg");
             texPaddle = graphicsDevice.createTexture(stream);
             materialPaddle.setTexture(texPaddle);
         } catch (IOException e) {
