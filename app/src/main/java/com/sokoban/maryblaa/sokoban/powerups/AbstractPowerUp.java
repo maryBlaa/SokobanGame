@@ -107,26 +107,6 @@ public abstract class AbstractPowerUp {
     }
 
     public void draw(){
-//        powerUpPositionX += speed * Math.sin(Math.toRadians(powerUpAngle));
-//        powerUpPositionY += speed * Math.cos(Math.toRadians(powerUpAngle));
-//
-//        //reflection top/bottom
-//        if (Math.abs(powerUpPositionY) > game.screenHeight / 2 - powerUpSize) {
-//            if (powerUpAngle > 0 * Math.PI && powerUpAngle < Math.PI) {
-//                powerUpAngle = (float) ((90 + (90 - powerUpAngle)) % 360);
-//            } else {
-//                powerUpAngle = (float) ((270 + (270 - powerUpAngle)) % 360);
-//            }
-//        }
-//        //reflection left/right
-//        if (Math.abs(powerUpPositionX) > game.screenWidth / 2 - powerUpSize) {
-//            if (powerUpAngle > 0 * Math.PI && powerUpAngle < Math.PI) {
-//                powerUpAngle = (float) ((90 + (90 - powerUpAngle)) % 360);
-//            } else {
-//                powerUpAngle = (float) ((270 + (270 - powerUpAngle)) % 360);
-//            }
-//        }
-
         // Power Up zeichnen
         Matrix4x4 worldPowerUp = Matrix4x4.createTranslation(powerUpPositionX, powerUpPositionY, 0).scale(powerUpSize);
         game.renderer.drawMesh(meshPowerUp, materialPowerUp, worldPowerUp);

@@ -54,7 +54,7 @@ public class SokobanGame extends Game {
     public int screenWidth;
     private AABB[] aabbMenu;
     private float paddleTranslationX = 400f;
-    private static final float paddleSize = 200f;
+    public static float paddleSize = 200f;
     public static float ballSize = 70f;
 
     private float[] paddlePositions = new float[]{0, 0};
@@ -510,6 +510,7 @@ public class SokobanGame extends Game {
 
             if(visiblePowerup.catchPowerUp()) {
                 powerupsActive.add(visiblePowerup);
+                visiblePowerup.performAction();
                 visiblePowerup = null;
             } else {
                 if(visiblePowerup.despawnFrame >= frame) {

@@ -7,17 +7,19 @@ import com.sokoban.maryblaa.sokoban.SokobanGame;
  */
 public class BallShrinker extends AbstractPowerUp {
 
+    private static final float BALLSIZE = 25f;
+
     public BallShrinker(SokobanGame game) {
         super(game);    // Congratulations
     }
 
     @Override
     public void performAction() {
-
+        SokobanGame.ballSize -= BALLSIZE;
     }
 
     @Override
     public void undoAction() {
-
+        SokobanGame.ballSize += BALLSIZE;
     }
 }
