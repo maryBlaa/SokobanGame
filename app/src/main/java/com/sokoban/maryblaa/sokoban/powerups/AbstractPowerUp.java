@@ -52,8 +52,6 @@ public abstract class AbstractPowerUp {
         int powerupTypeIndex = MathHelper.randomInt(0, PowerupType.values().length - 1);
         PowerupType type = PowerupType.values()[powerupTypeIndex];
 
-        type = PowerupType.PADDLEDIRECTIONINVERSER;
-
         AbstractPowerUp powerup;
         switch (type) {
 
