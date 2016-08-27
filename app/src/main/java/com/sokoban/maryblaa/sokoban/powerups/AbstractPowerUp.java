@@ -14,14 +14,14 @@ public abstract class AbstractPowerUp {
 
     public enum PowerupType {
 
-        BALLENLARGER ("ball.jpg", "ownBall.obj"),
-        PADDLEENLARGER ("ball.jpg", "ownBall.obj"),
-        BALLSHRINKER ("ball.jpg", "ownBall.obj"),
-        PADDLESHRINKER ("ball.jpg", "ownBall.obj"),
-        SPEEDUP ("ball.jpg", "ownBall.obj"),
-        SLOWDOWN ("ball.jpg", "ownBall.obj"),
-        BLINK ("ball.jpg", "ownBall.obj"),
-        PADDLEDIRECTIONINVERSER ("ball.jpg", "ownBall.obj");
+        BALLENLARGER("ball.jpg", "ownBall.obj"),
+        PADDLEENLARGER("ball.jpg", "ownBall.obj"),
+        BALLSHRINKER("ball.jpg", "ownBall.obj"),
+        PADDLESHRINKER("ball.jpg", "ownBall.obj"),
+        SPEEDUP("ball.jpg", "ownBall.obj"),
+        SLOWDOWN("ball.jpg", "ownBall.obj"),
+        BLINK("ball.jpg", "ownBall.obj"),
+        PADDLEDIRECTIONINVERSER("ball.jpg", "ownBall.obj");
 
         public String materialSrc;
         public String meshSrc;
@@ -55,7 +55,7 @@ public abstract class AbstractPowerUp {
         type = PowerupType.PADDLEDIRECTIONINVERSER;
 
         AbstractPowerUp powerup;
-        switch(type) {
+        switch (type) {
 
             case BALLENLARGER:
                 powerup = new BallEnlarger(game);
@@ -106,7 +106,7 @@ public abstract class AbstractPowerUp {
         powerUpPositionY = MathHelper.randomInt(game.screenHeight * -0.45, game.screenHeight * 0.45);
         powerUpPositionX = MathHelper.randomInt(game.screenWidth * -0.4, game.screenWidth * 0.4);
     }
-
+    
     public void draw(){
         // Power Up zeichnen
         Matrix4x4 worldPowerUp = Matrix4x4.createTranslation(powerUpPositionX, powerUpPositionY, 0).scale(powerUpSize);

@@ -11,13 +11,15 @@ public class SlowDown extends AbstractPowerUp {
         super(game);    // Congratulations
     }
 
+    private static final float SLOWDOWN = 5;
+
     @Override
     public void performAction() {
-
+        game.speed += SLOWDOWN;
     }
 
     @Override
     public void undoAction() {
-
+        game.speed -= SLOWDOWN;
     }
 }

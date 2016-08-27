@@ -21,6 +21,7 @@ import com.sokoban.maryblaa.sokoban.input.InputEvent;
 import com.sokoban.maryblaa.sokoban.math.Matrix4x4;
 import com.sokoban.maryblaa.sokoban.math.Vector3;
 import com.sokoban.maryblaa.sokoban.powerups.AbstractPowerUp;
+import com.sokoban.maryblaa.sokoban.powerups.Blink;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -78,6 +79,16 @@ public class SokobanGame extends Game {
 
     public HashMap<AbstractPowerUp.PowerupType, Mesh> powerupMeshes;
     public HashMap<AbstractPowerUp.PowerupType, Material> powerupMaterials;
+
+
+    float maxPosition = paddleTranslationX - ballSize;
+    public float ballPositionX = 0;
+    public float ballPositionY = 0;
+    float ballAngle = getBallStartPosition();
+    boolean collisionDetectionActive = true;
+
+    public boolean isBallBlinking = false;
+    public int blinkStartFrame = 0;
 
     private enum GameState {
         PRESTART, PLAYING, PAUSED, GAMEOVER;
@@ -225,12 +236,12 @@ public class SokobanGame extends Game {
         posMenu = new Matrix4x4[MenuEntry.values().length];
 
         for (int i = 0; i < MenuEntry.values().length; i++) {
-            posMenu[i] = Matrix4x4.createTranslation(0, (i+1) * dist, 0);
+            posMenu[i] = Matrix4x4.createTranslation(0, (i + 1) * dist, 0);
         }
 
         aabbMenu = new AABB[MenuEntry.values().length];
         for (int i = 0; i < MenuEntry.values().length; i++) {
-            aabbMenu[i] = new AABB(0, (i+1) * dist, 1000, -dist, MenuEntry.values()[i]);
+            aabbMenu[i] = new AABB(0, (i + 1) * dist, 1000, -dist, MenuEntry.values()[i]);
         }
     }
 
@@ -380,7 +391,7 @@ public class SokobanGame extends Game {
     }
 
     private void parseMenuEntry(MenuEntry entry) {
-        if(intro.isPlaying()) {
+        if (intro.isPlaying()) {
             intro.stop();
         }
         switch (entry) {
@@ -423,12 +434,6 @@ public class SokobanGame extends Game {
         }
     }
 
-    float maxPosition = paddleTranslationX - ballSize;
-    public float ballPositionX = 0;
-    public float ballPositionY = 0;
-    float ballAngle = getBallStartPosition();
-    boolean collisionDetectionActive = true;
-
     private float getBallStartPosition() {
         double random;
         do {
@@ -440,13 +445,13 @@ public class SokobanGame extends Game {
         return (float) random;
     }
 
-    float speed = 15f;
+    public float speed = 15f;
 
     private void drawGame() {
-        if(state == GameState.PLAYING) {
+        if (state == GameState.PLAYING) {
             frame++;
         }
-        System.out.println(frame);
+//        System.out.println(frame);
 
         float distance;
 
@@ -514,12 +519,12 @@ public class SokobanGame extends Game {
         }
         if (visiblePowerup != null) {
 
-            if(visiblePowerup.catchPowerUp()) {
+            if (visiblePowerup.catchPowerUp()) {
                 powerupsActive.add(visiblePowerup);
                 visiblePowerup.performAction();
                 visiblePowerup = null;
             } else {
-                if(visiblePowerup.despawnFrame >= frame) {
+                if (visiblePowerup.despawnFrame >= frame) {
                     visiblePowerup.draw();
                 } else {
                     visiblePowerup = null;
@@ -529,7 +534,10 @@ public class SokobanGame extends Game {
         }
 
         // Ball zeichnen
-        worldBall = Matrix4x4.createTranslation(ballPositionX, ballPositionY, 0).scale(ballSize);
+        boolean shouldDrawBall = !isBallBlinking || ((frame - blinkStartFrame) % (2 * Blink.BLINK_FRAME_RATE)) > 14;
+        if(shouldDrawBall) {
+            worldBall = Matrix4x4.createTranslation(ballPositionX, ballPositionY, 0).scale(ballSize);
+        }
 
         renderer.drawMesh(meshBall, materialBall, worldBall);
 
@@ -540,12 +548,12 @@ public class SokobanGame extends Game {
     }
 
     private void turnAround(float distance, boolean isLeft) {
-        if(!collisionDetectionActive) {
+        if (!collisionDetectionActive) {
             return;
         }
         float percentage = distance / paddleSize;
         float newAngle = percentage * 65;
-        if(!isLeft) {
+        if (!isLeft) {
             ballAngle = 270 + newAngle;
         } else {
             ballAngle = 90 - newAngle;
@@ -553,7 +561,7 @@ public class SokobanGame extends Game {
         collisionDetectionActive = false;
 
         MediaPlayer player = isLeft ? bounce1 : bounce2;
-        if(player.isPlaying()) {
+        if (player.isPlaying()) {
             player.seekTo(0);
         } else {
             player.start();
@@ -577,6 +585,7 @@ public class SokobanGame extends Game {
         paddleFingerPosition[1] = 0;
         ballPositionY = 0;
         ballPositionX = 0;
+        isBallBlinking = false;
         ballAngle = getBallStartPosition();
         worldPaddles = new Matrix4x4[]{
                 Matrix4x4.createTranslation(-paddleTranslationX, 0, 0).scale(paddleSize),
@@ -592,7 +601,7 @@ public class SokobanGame extends Game {
     }
 
     private void drawMenu() {
-        if(!introPlayed) {
+        if (!introPlayed) {
             introPlayed = true;
             intro.start();
         }
@@ -636,17 +645,17 @@ public class SokobanGame extends Game {
     }
 
     public boolean shouldSpawn() {
-        if(frame <= 150) {
+        if (frame <= 150) {
             return false;
         }
-        if(visiblePowerup != null) {
+        if (visiblePowerup != null) {
             return false;
         }
-        if(spawnFrame == 0) {
-            spawnFrame = MathHelper.randomInt(frame+1, frame+150);
+        if (spawnFrame == 0) {
+            spawnFrame = MathHelper.randomInt(frame + 1, frame + 150);
             return false;
         }
-        if(frame == spawnFrame) {
+        if (frame == spawnFrame) {
             spawnFrame = 0;
             return true;
         }
