@@ -21,7 +21,8 @@ public abstract class AbstractPowerUp {
         SPEEDUP("ball.jpg", "ownBall.obj"),
         SLOWDOWN("ball.jpg", "ownBall.obj"),
         BLINK("ball.jpg", "ownBall.obj"),
-        PADDLEDIRECTIONINVERSER("ball.jpg", "ownBall.obj");
+        PADDLEDIRECTIONINVERSER("ball.jpg", "ownBall.obj"),
+        DUPLICATEBALL("ball.jpg", "ownBall.obj");
 
         public String materialSrc;
         public String meshSrc;

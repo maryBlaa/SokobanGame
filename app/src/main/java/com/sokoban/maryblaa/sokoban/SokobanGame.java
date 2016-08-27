@@ -105,6 +105,16 @@ public class SokobanGame extends Game {
     private SpriteFont fontScore;
     private TextBuffer textScore;
 
+    private SpriteFont fontGameover;
+    private TextBuffer textGameover;
+    private Matrix4x4 posGameover;
+    private SpriteFont fontP;
+    private TextBuffer textP1;
+    private Matrix4x4 posP1;
+    private TextBuffer textP2;
+    private Matrix4x4 posP2;
+
+
     public int frame = 0;
     public double speedVariation = 1;
 
@@ -247,6 +257,16 @@ public class SokobanGame extends Game {
         fontScore = graphicsDevice.createSpriteFont(null, 120);
         textScore = graphicsDevice.createTextBuffer(fontScore, 16);
 
+        fontGameover = graphicsDevice.createSpriteFont(null, 150);
+        textGameover = graphicsDevice.createTextBuffer(fontGameover, 90);
+        fontP = graphicsDevice.createSpriteFont(null, 200);
+        textP1 = graphicsDevice.createTextBuffer(fontP, 90);
+        textP2 = graphicsDevice.createTextBuffer(fontP, 90);
+
+        posGameover = Matrix4x4.createTranslation(-367, 425, 0);
+        posP1 = Matrix4x4.createTranslation(-375, 0, 0);
+        posP2 = Matrix4x4.createTranslation(270, 0, 0);
+
         for (int i = 0; i < MenuEntry.values().length; i++) {
             textMenu[i] = graphicsDevice.createTextBuffer(fontMenu, 50);
         }
@@ -384,7 +404,6 @@ public class SokobanGame extends Game {
                 } else {
                     winner = 2;
                 }
-                Log.d(TAG, "GAMEOVER: PLAYER " + winner + " won!");
                 resetScore();
                 screen = Screen.MENU;
                 break;
@@ -645,8 +664,14 @@ public class SokobanGame extends Game {
     }
 
     private void drawGameover() {
-        graphicsDevice.setCamera(hudCamera);
-        renderer.drawText(textTitle, posTitle);
+        textGameover.setText("Game Over");
+        textP1.setText("" + scoreP1);
+        textP2.setText("" + scoreP2);
+        float[] bounds = textP1.getBounds();
+        Log.d(TAG, "breite: " + bounds[0] + "    höhe: " + bounds[1]);
+        renderer.drawText(textGameover, posGameover);
+        renderer.drawText(textP1, posP1);
+        renderer.drawText(textP2, posP2);
     }
 
     private void turnAround(float distance, boolean isLeft) {
