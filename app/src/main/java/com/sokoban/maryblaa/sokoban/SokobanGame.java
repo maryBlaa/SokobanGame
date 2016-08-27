@@ -537,9 +537,9 @@ public class SokobanGame extends Game {
         boolean shouldDrawBall = !isBallBlinking || ((frame - blinkStartFrame) % (2 * Blink.BLINK_FRAME_RATE)) > 14;
         if(shouldDrawBall) {
             worldBall = Matrix4x4.createTranslation(ballPositionX, ballPositionY, 0).scale(ballSize);
+            renderer.drawMesh(meshBall, materialBall, worldBall);
         }
 
-        renderer.drawMesh(meshBall, materialBall, worldBall);
 
         // Paddles zeichnen
         for (Matrix4x4 worldPaddle : worldPaddles) {
