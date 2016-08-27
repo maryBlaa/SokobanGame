@@ -102,9 +102,11 @@ public class SokobanGame extends Game {
     private SpriteFont fontTimeCounter;
     private TextBuffer textTimeCounter;
 
+    //Score
     private SpriteFont fontScore;
     private TextBuffer textScore;
 
+    //Gameover
     private SpriteFont fontGameover;
     private TextBuffer textGameover;
     private Matrix4x4 posGameover;
@@ -114,6 +116,16 @@ public class SokobanGame extends Game {
     private TextBuffer textP2;
     private Matrix4x4 posP2;
 
+    // Credits
+    private SpriteFont fontCredits;
+    private TextBuffer textCredits1;
+    private Matrix4x4 posCredits1;
+    private TextBuffer textCredits2;
+    private Matrix4x4 posCredits2;
+    private TextBuffer textCredits3;
+    private Matrix4x4 posCredits3;
+    private TextBuffer textCredits4;
+    private Matrix4x4 posCredits4;
 
     public int frame = 0;
     public double speedVariation = 1;
@@ -132,7 +144,7 @@ public class SokobanGame extends Game {
     }
 
     private enum Screen {
-        MENU, GAME, HIGHSCORE, CREDITS
+        MENU, GAME, OPTIONS, HIGHSCORE, CREDITS
 
     }
 
@@ -270,8 +282,6 @@ public class SokobanGame extends Game {
         for (int i = 0; i < MenuEntry.values().length; i++) {
             textMenu[i] = graphicsDevice.createTextBuffer(fontMenu, 50);
         }
-
-        textTitle.setText("Sokoban");
 
         for (MenuEntry entrie : MenuEntry.values()) {
             textMenu[entrie.ordinal()].setText(entrie.menuTitle);
@@ -478,10 +488,13 @@ public class SokobanGame extends Game {
                 miau.start();
                 break;
             case OPTIONS:
+                screen = Screen.OPTIONS;
                 break;
             case HIGHSCORE:
+                screen = Screen.HIGHSCORE;
                 break;
             case CREDITS:
+                screen = Screen.CREDITS;
                 break;
             case QUIT:
                 MediaPlayer.create(context, R.raw.exit).start();
@@ -498,8 +511,7 @@ public class SokobanGame extends Game {
 
     @Override
     public void draw(float deltaSeconds) {
-        graphicsDevice.clear(0.0f, 0.5f, 1.0f, 1.0f, 1.0f);
-
+        graphicsDevice.clear(1.0f, 0.0f, 0.0f, 1.0f, 1.0f);
         graphicsDevice.setCamera(sceneCamera);
 
         switch (screen) {
@@ -509,9 +521,14 @@ public class SokobanGame extends Game {
             case GAME:
                 drawGame();
                 break;
+            case OPTIONS:
+                drawOptions();
+                break;
             case HIGHSCORE:
+                drawHighscore();
                 break;
             case CREDITS:
+                drawCredits();
                 break;
         }
     }
@@ -667,8 +684,6 @@ public class SokobanGame extends Game {
         textGameover.setText("Game Over");
         textP1.setText("" + scoreP1);
         textP2.setText("" + scoreP2);
-        float[] bounds = textP1.getBounds();
-        Log.d(TAG, "breite: " + bounds[0] + "    höhe: " + bounds[1]);
         renderer.drawText(textGameover, posGameover);
         renderer.drawText(textP1, posP1);
         renderer.drawText(textP2, posP2);
@@ -739,6 +754,7 @@ public class SokobanGame extends Game {
     }
 
     private void drawMenu() {
+        textTitle.setText("Sokoban");
         if (!introPlayed) {
             introPlayed = true;
             intro.start();
@@ -752,6 +768,45 @@ public class SokobanGame extends Game {
             if (MenuEntry.values()[i].isVisible()) {
                 renderer.drawText(textMenu[i], posMenu[i]);
             }
+    }
+
+    private void drawOptions() {
+        textTitle.setText("Options");
+        renderer.drawText(textTitle, posTitle);
+    }
+
+    private void drawHighscore() {
+        textTitle.setText("Highscore");
+        renderer.drawText(textTitle, posTitle);
+    }
+
+    private void drawCredits() {
+        textTitle.setText("Credits");
+        renderer.drawText(textTitle, posTitle);
+
+        fontCredits = graphicsDevice.createSpriteFont(null, 90);
+        textCredits1 = graphicsDevice.createTextBuffer(fontCredits, 90);
+        textCredits2 = graphicsDevice.createTextBuffer(fontCredits, 90);
+        textCredits3 = graphicsDevice.createTextBuffer(fontCredits, 90);
+        textCredits4 = graphicsDevice.createTextBuffer(fontCredits, 90);
+
+        posCredits1 = Matrix4x4.createTranslation(-260, 400, 0);
+        posCredits2 = Matrix4x4.createTranslation(-264, 200, 0);
+        posCredits3 = Matrix4x4.createTranslation(-531, -400, 0);
+        posCredits4 = Matrix4x4.createTranslation(-260, -600, 0);
+
+        textCredits1.setText("Marissa Füeß"); //breite: 586.0    höhe: 69.0
+        renderer.drawText(textCredits1, posCredits1);
+        textCredits2.setText("Nicolai Schenk"); //breite: 593.0    höhe: 68.0
+        renderer.drawText(textCredits2, posCredits2);
+        textCredits3.setText("Special Thanks for Sounds"); //breite: 1062.0    höhe: 69.0
+        renderer.drawText(textCredits3, posCredits3);
+        textCredits4.setText("Thorsten Hack"); //586.0    höhe: 68.0
+        renderer.drawText(textCredits4, posCredits4);
+
+        float[] bounds = textCredits4.getBounds();
+        Log.d(TAG, "breite: " + bounds[0] + "    höhe: " + bounds[1]);
+
     }
 
     @Override
@@ -774,9 +829,11 @@ public class SokobanGame extends Game {
     public boolean onBackPressed() {
         if (screen == Screen.MENU) {
             parseMenuEntry(MenuEntry.QUIT);
-        } else {
+        } else if (gameState == GameState.PLAYING) {
             pauseDeltaTime = getDeltaTime();
             gameState = GameState.PAUSED;
+            screen = Screen.MENU;
+        } else {
             screen = Screen.MENU;
         }
 
