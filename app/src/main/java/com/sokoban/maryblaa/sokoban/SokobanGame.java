@@ -2,6 +2,7 @@ package com.sokoban.maryblaa.sokoban;
 
 import android.app.Activity;
 import android.media.MediaPlayer;
+import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
@@ -22,12 +23,19 @@ import com.sokoban.maryblaa.sokoban.math.Matrix4x4;
 import com.sokoban.maryblaa.sokoban.math.Vector3;
 import com.sokoban.maryblaa.sokoban.powerups.AbstractPowerUp;
 import com.sokoban.maryblaa.sokoban.powerups.Blink;
+import com.sokoban.maryblaa.sokoban.utils.JSONSharedPreferences;
 import com.sokoban.maryblaa.sokoban.utils.Prefs;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 
@@ -409,14 +417,68 @@ public class SokobanGame extends Game {
                     break;
                 }
             case GAMEOVER:
-                int winner;
-                if (scoreP1 > scoreP2) {
-                    winner = 1;
-                } else {
-                    winner = 2;
+
+                int winner = scoreP1 > scoreP2 ? 1 : 2;
+                try {
+                    // load last winners
+                    JSONObject oldHighscore;
+
+                    oldHighscore = JSONSharedPreferences.loadJSONObject(context, "sokoban", "highscore");
+                    JSONArray scoresArray = oldHighscore.getJSONArray("highscore");
+
+                    // add first ten highscores
+                    if(scoresArray.length() < 10) {
+
+                        createStats(winner, scoresArray);
+
+                        JSONObject tmpHighscore = new JSONObject();
+                        tmpHighscore.put("highscore", scoresArray);
+
+                        JSONSharedPreferences.saveJSONObject(context, "sokoban", "highscore", tmpHighscore);
+                    } else {
+                        // add highscore on correct position with more than 10 highscores
+                        JSONArray sortedJsonArray = getSortedJsonArray(scoresArray);
+                        Log.d(TAG, "scoresArray: " + scoresArray);
+                        Log.d(TAG, "sortedJsonArray: " + sortedJsonArray);
+
+                        for (int i = 0; i < sortedJsonArray.length(); i++) {
+                            JSONObject tmp = sortedJsonArray.getJSONObject(i);
+
+                            if(getDeltaTime() > tmp.getInt("time")) {
+                                JSONObject tmpStats = new JSONObject();
+                                tmpStats.put("player", winner);
+                                tmpStats.put("time", getDeltaTime());
+                                sortedJsonArray.put(i, tmpStats);
+
+                                sortedJsonArray.remove(11);
+                            }
+                        }
+
+                    }
+
+                } catch (JSONException jsonError) {
+                    Log.d(TAG, "there is no JSONSharedPreferences, add new one" + jsonError);
+                    try {
+                        JSONArray tmpArray = new JSONArray();
+
+                        createStats(winner, tmpArray);
+
+                        JSONObject tmpHighscore = new JSONObject();
+                        tmpHighscore.put("highscore", tmpArray);
+
+                        JSONSharedPreferences.saveJSONObject(context, "sokoban", "highscore", tmpHighscore);
+                    } catch (JSONException jsonErrorTwo) {
+
+                    }
                 }
+
+
+
+
+                // useless
                 Prefs.setInt(Prefs.PLAYER1, scoreP1);
                 Prefs.setInt(Prefs.PLAYER2, scoreP2);
+
 
                 resetScore();
                 screen = Screen.MENU;
@@ -424,6 +486,48 @@ public class SokobanGame extends Game {
         }
 
 
+    }
+
+    @NonNull
+    private JSONArray getSortedJsonArray(JSONArray scoresArray) throws JSONException {
+        JSONArray sortedJsonArray = new JSONArray();
+
+        List<JSONObject> jsonValues = new ArrayList<JSONObject>();
+        for (int i = 0; i < scoresArray.length(); i++) {
+            jsonValues.add(scoresArray.getJSONObject(i));
+        }
+
+        // see @ http://stackoverflow.com/questions/19543862/how-can-i-sort-a-jsonarray-in-java
+        Collections.sort( jsonValues, new Comparator<JSONObject>() {
+            private static final String KEY_NAME = "time";
+
+            @Override
+            public int compare(JSONObject a, JSONObject b) {
+                Integer valA = 0;
+                Integer valB = 0;
+
+                try {
+                    valA = (Integer) a.get(KEY_NAME);
+                    valB = (Integer) b.get(KEY_NAME);
+                }
+                catch (JSONException e) {
+                    //do something
+                }
+                return valA.compareTo(valB);
+            }
+        });
+
+        for (int i = 0; i < scoresArray.length(); i++) {
+            sortedJsonArray.put(jsonValues.get(i));
+        }
+        return sortedJsonArray;
+    }
+
+    private void createStats(int winner, JSONArray scoresArray) throws JSONException {
+        JSONObject tmpStats = new JSONObject();
+        tmpStats.put("player", winner);
+        tmpStats.put("time", getDeltaTime());
+        scoresArray.put(tmpStats);
     }
 
     private void resetDeltaTimeCounter() {
@@ -614,12 +718,9 @@ public class SokobanGame extends Game {
             if (Math.abs(ballPositionY) > screenHeight / 2 - ballSize) {
                 if (ballAngle > 0 * Math.PI && ballAngle < Math.PI) {
                     ballAngle = (float) ((90 + (90 - ballAngle)) % 360);
-                    Log.d(TAG, "vertikale Kante: von " + tmp + " nach " + ballAngle);
 
                 } else {
                     ballAngle = (float) ((270 + (270 - ballAngle)) % 360);
-                    Log.d(TAG, "vertikale Kante: von " + tmp + " nach " + ballAngle);
-
                 }
 
                 if (bounce3.isPlaying()) {
@@ -685,6 +786,7 @@ public class SokobanGame extends Game {
     }
 
     private void drawGameover() {
+        Log.d(TAG, ""+getDeltaTime());
         textGameover.setText("Game Over");
         textP1.setText("" + scoreP1);
         textP2.setText("" + scoreP2);
@@ -783,7 +885,14 @@ public class SokobanGame extends Game {
         textTitle.setText("Highscore");
         renderer.drawText(textTitle, posTitle);
 
-        Log.d(TAG, "Last scores: P1: " + Prefs.getInt(Prefs.PLAYER1, 0) + ", P2: " + Prefs.getInt(Prefs.PLAYER2, 0));
+        try {
+            JSONObject highscore = JSONSharedPreferences.loadJSONObject(context, "sokoban", "highscore");
+            Log.d(TAG, "JSON " +  highscore.toString());
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
     }
 
     private void drawCredits() {
