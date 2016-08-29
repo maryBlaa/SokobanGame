@@ -102,7 +102,7 @@ public class SokobanGame extends Game {
     public HashMap<AbstractPowerUp.PowerupType, Material> powerupMaterials;
 
 
-    float maxPosition = paddleTranslationX - ballSize;
+    float maxPosition;
     public float ballPositionX = 0;
     public float ballPositionY = 0;
     public float ballAngle = getBallStartPosition();
@@ -164,6 +164,7 @@ public class SokobanGame extends Game {
     private int scoreTime = 0;
     private AABB aabbplus;
     private AABB aabbminus;
+    private long reactionTime;
 
     private enum GameState {
         PRESTART, PLAYING, PAUSED, MATCHPOINT, GAMEOVER;
@@ -395,10 +396,8 @@ public class SokobanGame extends Game {
                             }
                             break;
                     }
-//                    Log.d(TAG, "" + inputEvent.getDevice());
                     break;
                 case ROTATION:
-//                    Log.d(TAG, "ROTATION");
                     break;
                 case TOUCHSCREEN:
 
@@ -429,14 +428,10 @@ public class SokobanGame extends Game {
                             if (screen == Screen.GAME) {
                                 detectPaddleTouchMove(touchPoint);
                             }
-
                     }
-
-
             }
             inputSystem.popEvent();
             inputEvent = inputSystem.peekEvent();
-
         }
     }
 
@@ -511,7 +506,6 @@ public class SokobanGame extends Game {
                                 break;
                             }
                         }
-
                     }
 
                 } catch (JSONException jsonError) {
@@ -529,10 +523,6 @@ public class SokobanGame extends Game {
 
                     }
                 }
-
-
-
-
                 // useless
                 Prefs.setInt(Prefs.PLAYER1, scoreP1);
                 Prefs.setInt(Prefs.PLAYER2, scoreP2);
@@ -542,8 +532,6 @@ public class SokobanGame extends Game {
                 screen = Screen.MENU;
                 break;
         }
-
-
     }
 
     @NonNull
@@ -629,15 +617,35 @@ public class SokobanGame extends Game {
 
     private void aiPaddleMove() {
 
-        if (gameState != GameState.PLAYING) {
+//        long aiReaction = reactionTime + MathHelper.randomInt(300, 500);
+        if (gameState != GameState.PLAYING && ballAngle > 180) {
             return;
         }
-        float newPaddlePosition;
-        newPaddlePosition = ballPositionY;
+
+            float newPaddlePosition;
+            newPaddlePosition = ballPositionY;
+//        if (true) {
+//            if (ballPositionY >= 0) {
+//                if (Math.abs(newPaddlePosition) < screenHeight / 2 - paddleSizes[1])
+//                for (float i = paddlePositions[1]; i < newPaddlePosition; i+=2) {
+//                    paddlePositions[1] = i;
+//                    calculateWorldPaddle(1);
+//                }
+//            } else {
+//                if (Math.abs(newPaddlePosition) < screenHeight / 2 - paddleSizes[1])
+//                for (float i = paddlePositions[1]; i > newPaddlePosition; i-=2) {
+//                    paddlePositions[1] = i;
+//                    calculateWorldPaddle(1);
+//                }
+//            }
             if (Math.abs(newPaddlePosition) < screenHeight / 2 - paddleSizes[1]) {
                 paddlePositions[1] = newPaddlePosition;
                 calculateWorldPaddle(1);
             }
+//            reactionTime = 0;
+//        } else {
+//            return;
+//        }
     }
 
 
@@ -712,7 +720,7 @@ public class SokobanGame extends Game {
 
     @Override
     public void draw(float deltaSeconds) {
-        graphicsDevice.clear(1.0f, 0.0f, 0.0f, 1.0f, 1.0f);
+        graphicsDevice.clear(0.0f, 0.5f, 1.0f, 1.0f, 1.0f);
         graphicsDevice.setCamera(sceneCamera);
 
         switch (screen) {
@@ -769,6 +777,7 @@ public class SokobanGame extends Game {
             renderer.drawText(textTimeCounter, posTitle);
 
             // Collisiondetection Paddle Ball
+            maxPosition = paddleTranslationX - ballSize;
             float distance;
             double speed = speedVariation * (largestWidth / (fpms * BASE_SPEED));
             ballPositionX += speed * Math.sin(Math.toRadians(ballAngle));
@@ -811,6 +820,7 @@ public class SokobanGame extends Game {
             }
 
             float tmp = ballAngle;
+            Log.d(TAG, "" + ballAngle);
 
             if (Math.abs(ballPositionY) > screenHeight / 2 - ballSize) {
                 if (ballAngle > 0 * Math.PI && ballAngle < Math.PI) {
@@ -1083,5 +1093,4 @@ public class SokobanGame extends Game {
         }
         return false;
     }
-
 }
