@@ -291,6 +291,18 @@ public class SokobanGame extends Game {
         posP1 = Matrix4x4.createTranslation(-375, 0, 0);
         posP2 = Matrix4x4.createTranslation(270, 0, 0);
 
+        //Credits
+        fontCredits = graphicsDevice.createSpriteFont(null, 90);
+        textCredits1 = graphicsDevice.createTextBuffer(fontCredits, 90);
+        textCredits2 = graphicsDevice.createTextBuffer(fontCredits, 90);
+        textCredits3 = graphicsDevice.createTextBuffer(fontCredits, 90);
+        textCredits4 = graphicsDevice.createTextBuffer(fontCredits, 90);
+
+        posCredits1 = Matrix4x4.createTranslation(-271, 400, 0);
+        posCredits2 = Matrix4x4.createTranslation(-297, 200, 0);
+        posCredits3 = Matrix4x4.createTranslation(-531, -400, 0);
+        posCredits4 = Matrix4x4.createTranslation(-297, -600, 0);
+
         for (int i = 0; i < MenuEntry.values().length; i++) {
             textMenu[i] = graphicsDevice.createTextBuffer(fontMenu, 50);
         }
@@ -946,29 +958,17 @@ public class SokobanGame extends Game {
         textTitle.setText("Credits");
         renderer.drawText(textTitle, posTitle);
 
-        fontCredits = graphicsDevice.createSpriteFont(null, 90);
-        textCredits1 = graphicsDevice.createTextBuffer(fontCredits, 90);
-        textCredits2 = graphicsDevice.createTextBuffer(fontCredits, 90);
-        textCredits3 = graphicsDevice.createTextBuffer(fontCredits, 90);
-        textCredits4 = graphicsDevice.createTextBuffer(fontCredits, 90);
-
-        posCredits1 = Matrix4x4.createTranslation(-260, 400, 0);
-        posCredits2 = Matrix4x4.createTranslation(-264, 200, 0);
-        posCredits3 = Matrix4x4.createTranslation(-531, -400, 0);
-        posCredits4 = Matrix4x4.createTranslation(-260, -600, 0);
-
-        textCredits1.setText("Marissa Füeß"); //breite: 586.0    höhe: 69.0
+        textCredits1.setText("Marissa Füeß"); //breite: 541.0    höhe: 69.0
         renderer.drawText(textCredits1, posCredits1);
         textCredits2.setText("Nicolai Schenk"); //breite: 593.0    höhe: 68.0
         renderer.drawText(textCredits2, posCredits2);
         textCredits3.setText("Special Thanks for Sounds"); //breite: 1062.0    höhe: 69.0
         renderer.drawText(textCredits3, posCredits3);
-        textCredits4.setText("Thorsten Hack"); //586.0    höhe: 68.0
+        textCredits4.setText("Thorsten Hack"); //593.0    höhe: 68.0
         renderer.drawText(textCredits4, posCredits4);
 
-        float[] bounds = textCredits4.getBounds();
-        Log.d(TAG, "breite: " + bounds[0] + "    höhe: " + bounds[1]);
-
+        //float[] bounds = textCredits2.getBounds();
+        //Log.d(TAG, "breite: " + bounds[0] + "    höhe: " + bounds[1]);
     }
 
     @Override
