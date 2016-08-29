@@ -66,7 +66,9 @@ public class SokobanGame extends Game {
     private TextBuffer textTitle;
     private Matrix4x4 posTitle;
     private TextBuffer[] textMenu;
+    private TextBuffer[] textHighscore;
     private Matrix4x4[] posMenu;
+    private Matrix4x4[] posHighscore;
     public int screenHeight;
     public int screenWidth;
     public int largestWidth;
@@ -308,6 +310,19 @@ public class SokobanGame extends Game {
         posPlus = Matrix4x4.createTranslation(0, 150, 0);
         textMinus = graphicsDevice.createTextBuffer(fontOptions, 90);
         posMinus = Matrix4x4.createTranslation(0, -150, 0);
+
+        // Highscore
+        fontCredits = graphicsDevice.createSpriteFont(null, 60);
+        textHighscore = new TextBuffer[10];
+        posHighscore = new Matrix4x4[10];
+
+        int pos = +600;
+
+        for(int i = 0; i < 10; i++) { // maximum 10 scores
+            textHighscore[i] = graphicsDevice.createTextBuffer(fontCredits, 100);
+            posHighscore[i] = Matrix4x4.createTranslation(-400, pos - 120, 0);
+            pos -= 100;
+        }
 
         //Credits
         fontCredits = graphicsDevice.createSpriteFont(null, 90);
@@ -955,6 +970,17 @@ public class SokobanGame extends Game {
             JSONObject highscore = JSONSharedPreferences.loadJSONObject(context, "sokoban", "highscore");
             Log.d(TAG, "JSON " +  highscore.toString());
 
+            JSONArray scoresArray = highscore.getJSONArray("highscore");
+            scoresArray = getSortedJsonArray(scoresArray);
+
+            for(int i = 0; i < scoresArray.length(); i++) {
+                JSONObject score = scoresArray.getJSONObject(i);
+                textHighscore[i].setText("player: " + score.get("player") + " time: " + score.get("time") + " Sekunden");
+            }
+
+            for (int i = 0; i < textHighscore.length; i++) {
+                renderer.drawText(textHighscore[i], posHighscore[i]);
+            }
         } catch (JSONException e) {
             e.printStackTrace();
         }
