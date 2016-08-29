@@ -291,6 +291,19 @@ public class SokobanGame extends Game {
         posP1 = Matrix4x4.createTranslation(-375, 0, 0);
         posP2 = Matrix4x4.createTranslation(270, 0, 0);
 
+        // Highscore
+        fontCredits = graphicsDevice.createSpriteFont(null, 60);
+        textHighscore = new TextBuffer[10];
+        posHighscore = new Matrix4x4[10];
+
+        int pos = +600;
+
+        for(int i = 0; i < 10; i++) { // maximum 10 scores
+            textHighscore[i] = graphicsDevice.createTextBuffer(fontCredits, 100);
+            posHighscore[i] = Matrix4x4.createTranslation(-400, pos - 120, 0);
+            pos -= 100;
+        }
+
         //Credits
         fontCredits = graphicsDevice.createSpriteFont(null, 90);
         textCredits1 = graphicsDevice.createTextBuffer(fontCredits, 90);
@@ -324,6 +337,8 @@ public class SokobanGame extends Game {
         for (int i = 0; i < MenuEntry.values().length; i++) {
             aabbMenu[i] = new AABB(0, (i + 1) * dist, 1000, -dist, MenuEntry.values()[i]);
         }
+
+
     }
 
     @Override
@@ -908,46 +923,21 @@ public class SokobanGame extends Game {
         renderer.drawText(textTitle, posTitle);
 
         try {
-            fontCredits = graphicsDevice.createSpriteFont(null, 60);
-            textHighscore = new TextBuffer[10];
-            posHighscore = new Matrix4x4[10];
 
             JSONObject highscore = JSONSharedPreferences.loadJSONObject(context, "sokoban", "highscore");
             Log.d(TAG, "JSON " +  highscore.toString());
 
             JSONArray scoresArray = highscore.getJSONArray("highscore");
-
-            int pos = -600;
+            scoresArray = getSortedJsonArray(scoresArray);
 
             for(int i = 0; i < scoresArray.length(); i++) {
                 JSONObject score = scoresArray.getJSONObject(i);
-                textHighscore[i] = graphicsDevice.createTextBuffer(fontCredits, 100);
-                posHighscore[i] = Matrix4x4.createTranslation(-400, pos + 120, 0);
-                pos += 100;
                 textHighscore[i].setText("player: " + score.get("player") + " time: " + score.get("time") + " Sekunden");
             }
 
             for (int i = 0; i < textHighscore.length; i++) {
                 renderer.drawText(textHighscore[i], posHighscore[i]);
             }
-
-//            textCredits2 = graphicsDevice.createTextBuffer(fontCredits, 20);
-//            textCredits3 = graphicsDevice.createTextBuffer(fontCredits, 20);
-//            textCredits4 = graphicsDevice.createTextBuffer(fontCredits, 20);
-//
-//            posCredits2 = Matrix4x4.createTranslation(0, 90, 0);
-//            posCredits3 = Matrix4x4.createTranslation(0, 120, 0);
-//            posCredits4 = Matrix4x4.createTranslation(0, 150, 0);
-//
-//            textCredits2.setText("Nicolai Schenk"); //breite: 593.0    höhe: 68.0
-//            renderer.drawText(textCredits2, posCredits2);
-//            textCredits3.setText("Special Thanks for Sounds"); //breite: 1062.0    höhe: 69.0
-//            renderer.drawText(textCredits3, posCredits3);
-//            textCredits4.setText("Thorsten Hack"); //586.0    höhe: 68.0
-//            renderer.drawText(textCredits4, posCredits4);
-
-
-
         } catch (JSONException e) {
             e.printStackTrace();
         }
