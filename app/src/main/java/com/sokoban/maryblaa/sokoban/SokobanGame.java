@@ -113,6 +113,8 @@ public class SokobanGame extends Game {
     private SpriteFont fontTimeCounter;
     private TextBuffer textTimeCounter;
 
+    public boolean isAIGame = false;
+
     //Score
     private SpriteFont fontScore;
     private TextBuffer textScore;
@@ -155,6 +157,8 @@ public class SokobanGame extends Game {
     private int pauseDeltaTime;
     private double fpms = 0.03;
 
+    public String nameP1 = "Mary";
+    public String nameP2 = "Nick";
     public int scoreP1 = 0;
     public int scoreP2 = 0;
     private int scoreTime = 0;
@@ -172,7 +176,7 @@ public class SokobanGame extends Game {
     }
 
     enum MenuEntry {
-        RESUME("Resume"), NEWGAME("New Game"), OPTIONS("Options"), HIGHSCORE("Highscore"), CREDITS("Credits"), QUIT("Quit");
+        RESUME("Resume"), AIGAME("AI Game"), VERSUS("Versus"), OPTIONS("Options"), HIGHSCORE("Highscore"), CREDITS("Credits"), QUIT("Quit");
 
         private final String menuTitle;
 
@@ -652,7 +656,17 @@ public class SokobanGame extends Game {
                 screen = Screen.GAME;
                 gameState = GameState.PAUSED;
                 break;
-            case NEWGAME:
+            case AIGAME:
+                isAIGame = true;
+                resetPositions();
+                resetScore();
+                nameP2 = "AI";
+                screen = Screen.GAME;
+                gameState = GameState.PRESTART;
+                miau.start();
+                break;
+            case VERSUS:
+                isAIGame = false;
                 resetPositions();
                 resetScore();
                 screen = Screen.GAME;
@@ -673,7 +687,6 @@ public class SokobanGame extends Game {
                 ((Activity) view.getContext()).finish();
                 break;
         }
-
     }
 
     private void resetScore() {
@@ -692,7 +705,11 @@ public class SokobanGame extends Game {
                 drawMenu();
                 break;
             case GAME:
-                drawGame();
+                if (isAIGame) {
+                    drawAIGame();
+                } else {
+                    drawGame();
+                }
                 break;
             case OPTIONS:
                 drawOptions();
@@ -723,6 +740,102 @@ public class SokobanGame extends Game {
 
 
     private void drawGame() {
+        currentDeltaTime = getDeltaTime();
+
+        if (gameState == GameState.PLAYING) {
+            frame++;
+
+            if (currentDeltaTime > 0) {
+                fpms = frame / ((double) currentDeltaTime);
+            }
+
+            textTimeCounter.setText((currentDeltaTime / 1000) + "s, " + (int) (fpms * 1000) + " fps");
+            renderer.drawText(textTimeCounter, posTitle);
+        }
+
+        float distance;
+
+        // Collisiondetection Paddle Ball
+        if (gameState == GameState.PLAYING) {
+            double speed = speedVariation * (largestWidth / (fpms * BASE_SPEED));
+            ballPositionX += speed * Math.sin(Math.toRadians(ballAngle));
+            ballPositionY += speed * Math.cos(Math.toRadians(ballAngle));
+            if (ballPositionX > maxPosition + paddleSizes[1] * 0.2) {
+                // right Paddle
+                distance = ballPositionY - paddlePositions[1];
+                if (Math.abs(distance) > paddleSizes[1]) {
+                    scoreP1 += 1;
+                    scoreTime += (currentDeltaTime / 1000);
+                    setMatchpointState();
+                    return;
+                } else {
+                    turnAround(distance, false);
+                }
+            } else if (ballPositionX > maxPosition) {
+                distance = ballPositionY - paddlePositions[1];
+                if (Math.abs(distance) <= paddleSizes[1]) {
+                    turnAround(distance, false);
+                }
+            } else if (ballPositionX < -maxPosition - paddleSizes[0] * 0.2) {
+                // left Paddle
+                distance = ballPositionY - paddlePositions[0];
+                if (Math.abs(distance) > paddleSizes[0]) {
+                    scoreTime += (currentDeltaTime / 1000);
+                    scoreP2 += 1;
+                    setMatchpointState();
+                    return;
+                } else {
+                    turnAround(distance, true);
+                }
+            } else if (ballPositionX < -maxPosition) {
+
+                distance = ballPositionY - paddlePositions[0];
+                if (Math.abs(distance) <= paddleSizes[0]) {
+                    turnAround(distance, true);
+                }
+            } else {
+                collisionDetectionActive = true;
+            }
+
+            float tmp = ballAngle;
+
+            if (Math.abs(ballPositionY) > screenHeight / 2 - ballSize) {
+                if (ballAngle > 0 * Math.PI && ballAngle < Math.PI) {
+                    ballAngle = (float) ((90 + (90 - ballAngle)) % 360);
+
+                } else {
+                    ballAngle = (float) ((270 + (270 - ballAngle)) % 360);
+                }
+
+                if (bounce3.isPlaying()) {
+                    bounce3.seekTo(0);
+                } else {
+                    bounce3.start();
+                }
+            }
+            drawPowerUp();
+            removeExpiredPowerUp();
+        } else if (gameState == GameState.GAMEOVER) {
+            drawGameover();
+        } else {
+            textScore.setText(scoreP1 + " : " + scoreP2);
+            renderer.drawText(textScore, posTitle);
+        }
+
+        // draw Ball
+        boolean shouldDrawBall = !isBallBlinking || ((currentDeltaTime - blinkStartDeltaTime) % Blink.BLINK_DURATION_MS) > Blink.BLINK_DURATION_MS/2;
+        if(shouldDrawBall) {
+            worldBall = Matrix4x4.createTranslation(ballPositionX, ballPositionY, 0).scale(ballSize);
+            renderer.drawMesh(meshBall, materialBall, worldBall);
+        }
+
+        // draw Paddles
+        for (Matrix4x4 worldPaddle : worldPaddles) {
+            renderer.drawMesh(meshPaddle, materialPaddle, worldPaddle);
+        }
+    }
+
+    private void drawAIGame() {
         currentDeltaTime = getDeltaTime();
 
         if (gameState == GameState.PLAYING) {
