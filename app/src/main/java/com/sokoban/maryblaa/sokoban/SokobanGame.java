@@ -53,7 +53,7 @@ public class SokobanGame extends Game {
     private static final int MAX_DELAY_BETWEEN_POWERUPS = 3000;
     // base speed: 2000ms for largest width
     public static int BASE_SPEED = 2000;
-    public int MAX_MATCHPOINTS = 5;
+    public int MAX_MATCHPOINTS = 2;
 
     private Camera hudCamera, sceneCamera;
     private Mesh meshBall, meshPaddle;
@@ -146,6 +146,7 @@ public class SokobanGame extends Game {
 
     public int scoreP1 = 0;
     public int scoreP2 = 0;
+    private int scoreTime = 0;
 
     private enum GameState {
         PRESTART, PLAYING, PAUSED, MATCHPOINT, GAMEOVER;
@@ -444,13 +445,17 @@ public class SokobanGame extends Game {
                         for (int i = 0; i < sortedJsonArray.length(); i++) {
                             JSONObject tmp = sortedJsonArray.getJSONObject(i);
 
-                            if(getDeltaTime() > tmp.getInt("time")) {
+                            if(scoreTime > tmp.getInt("time")) {
                                 JSONObject tmpStats = new JSONObject();
                                 tmpStats.put("player", winner);
-                                tmpStats.put("time", getDeltaTime());
-                                sortedJsonArray.put(i, tmpStats);
+                                tmpStats.put("time", scoreTime);
+                                sortedJsonArray.put(9, tmpStats); // change the last one with this one
 
-                                sortedJsonArray.remove(11);
+                                JSONObject newHighscore = new JSONObject();
+                                newHighscore.put("highscore", sortedJsonArray);
+
+                                JSONSharedPreferences.saveJSONObject(context, "sokoban", "highscore", newHighscore);
+                                break;
                             }
                         }
 
@@ -513,7 +518,7 @@ public class SokobanGame extends Game {
                 catch (JSONException e) {
                     //do something
                 }
-                return valA.compareTo(valB);
+                return valB.compareTo(valA);
             }
         });
 
@@ -526,7 +531,7 @@ public class SokobanGame extends Game {
     private void createStats(int winner, JSONArray scoresArray) throws JSONException {
         JSONObject tmpStats = new JSONObject();
         tmpStats.put("player", winner);
-        tmpStats.put("time", getDeltaTime());
+        tmpStats.put("time", scoreTime);
         scoresArray.put(tmpStats);
     }
 
@@ -615,6 +620,7 @@ public class SokobanGame extends Game {
     private void resetScore() {
         scoreP1 = 0;
         scoreP2 = 0;
+        scoreTime = 0;
     }
 
     @Override
@@ -683,6 +689,7 @@ public class SokobanGame extends Game {
                 distance = ballPositionY - paddlePositions[1];
                 if (Math.abs(distance) > paddleSizes[1]) {
                     scoreP1 += 1;
+                    scoreTime += (currentDeltaTime / 1000);
                     setMatchpointState();
                     return;
                 } else {
@@ -697,6 +704,7 @@ public class SokobanGame extends Game {
                 // left Paddle
                 distance = ballPositionY - paddlePositions[0];
                 if (Math.abs(distance) > paddleSizes[0]) {
+                    scoreTime += (currentDeltaTime / 1000);
                     scoreP2 += 1;
                     setMatchpointState();
                     return;
