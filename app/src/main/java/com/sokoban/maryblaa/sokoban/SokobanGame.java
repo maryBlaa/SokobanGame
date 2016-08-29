@@ -41,9 +41,6 @@ import java.util.List;
 
 import javax.microedition.khronos.opengles.GL10;
 
-/**
- * Created by maryBlaa on 02.02.2016.
- */
 public class SokobanGame extends Game {
 
     public static final String TAG = SokobanGame.class.getSimpleName();
@@ -164,10 +161,10 @@ public class SokobanGame extends Game {
     private int scoreTime = 0;
     private AABB aabbplus;
     private AABB aabbminus;
-    private long reactionTime;
+//    private long reactionTime;
 
     private enum GameState {
-        PRESTART, PLAYING, PAUSED, MATCHPOINT, GAMEOVER;
+        PRESTART, PLAYING, PAUSED, MATCHPOINT, GAMEOVER
 
     }
 
@@ -196,8 +193,8 @@ public class SokobanGame extends Game {
 
     @Override
     public void initialize() {
-        Matrix4x4 projection = new Matrix4x4();
-        Matrix4x4 view = new Matrix4x4();
+        Matrix4x4 projection;
+        Matrix4x4 view;
 
         projection = new Matrix4x4();
         projection.setOrthogonalProjection(-100f, 100f, -100f, 100f, 0.0f, 100.0f);
@@ -281,7 +278,6 @@ public class SokobanGame extends Game {
             texPaddle = graphicsDevice.createTexture(stream);
             materialPaddle.setTexture(texPaddle);
         } catch (IOException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
 
@@ -520,14 +516,9 @@ public class SokobanGame extends Game {
 
                         JSONSharedPreferences.saveJSONObject(context, "sokoban", "highscore", tmpHighscore);
                     } catch (JSONException jsonErrorTwo) {
-
+                        Log.d(TAG, "" + jsonErrorTwo);
                     }
                 }
-                // useless
-                Prefs.setInt(Prefs.PLAYER1, scoreP1);
-                Prefs.setInt(Prefs.PLAYER2, scoreP2);
-
-
                 resetScore();
                 screen = Screen.MENU;
                 break;
@@ -538,7 +529,7 @@ public class SokobanGame extends Game {
     private JSONArray getSortedJsonArray(JSONArray scoresArray) throws JSONException {
         JSONArray sortedJsonArray = new JSONArray();
 
-        List<JSONObject> jsonValues = new ArrayList<JSONObject>();
+        List<JSONObject> jsonValues = new ArrayList<>();
         for (int i = 0; i < scoresArray.length(); i++) {
             jsonValues.add(scoresArray.getJSONObject(i));
         }
@@ -819,15 +810,12 @@ public class SokobanGame extends Game {
                 collisionDetectionActive = true;
             }
 
-            float tmp = ballAngle;
-            Log.d(TAG, "" + ballAngle);
-
             if (Math.abs(ballPositionY) > screenHeight / 2 - ballSize) {
                 if (ballAngle > 0 * Math.PI && ballAngle < Math.PI) {
-                    ballAngle = (float) ((90 + (90 - ballAngle)) % 360);
+                    ballAngle = ((90 + (90 - ballAngle)) % 360);
 
                 } else {
-                    ballAngle = (float) ((270 + (270 - ballAngle)) % 360);
+                    ballAngle = ((270 + (270 - ballAngle)) % 360);
                 }
 
                 if (bounce3.isPlaying()) {
@@ -1047,7 +1035,7 @@ public class SokobanGame extends Game {
 
     @Override
     public void resize(int width, int height) {
-        float aspect = (float) width / (float) height;
+//        float aspect = (float) width / (float) height;
         Matrix4x4 projection;
 
         projection = new Matrix4x4();
