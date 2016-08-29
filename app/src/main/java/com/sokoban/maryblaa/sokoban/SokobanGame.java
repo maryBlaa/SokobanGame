@@ -125,6 +125,15 @@ public class SokobanGame extends Game {
     private TextBuffer textP2;
     private Matrix4x4 posP2;
 
+    //Options
+    private SpriteFont fontOptions;
+    private TextBuffer textOptions;
+    private Matrix4x4 posOptions;
+    private TextBuffer textPlus;
+    private Matrix4x4 posPlus;
+    private TextBuffer textMinus;
+    private Matrix4x4 posMinus;
+
     // Credits
     private SpriteFont fontCredits;
     private TextBuffer textCredits1;
@@ -147,6 +156,8 @@ public class SokobanGame extends Game {
     public int scoreP1 = 0;
     public int scoreP2 = 0;
     private int scoreTime = 0;
+    private AABB aabbplus;
+    private AABB aabbminus;
 
     private enum GameState {
         PRESTART, PLAYING, PAUSED, MATCHPOINT, GAMEOVER;
@@ -289,6 +300,15 @@ public class SokobanGame extends Game {
         posP1 = Matrix4x4.createTranslation(-375, 0, 0);
         posP2 = Matrix4x4.createTranslation(270, 0, 0);
 
+        //Options
+        fontOptions = graphicsDevice.createSpriteFont(null, 90);
+        textOptions = graphicsDevice.createTextBuffer(fontOptions, 90);
+        posOptions = Matrix4x4.createTranslation(-530, 0, 0);
+        textPlus = graphicsDevice.createTextBuffer(fontOptions, 90);
+        posPlus = Matrix4x4.createTranslation(0, 150, 0);
+        textMinus = graphicsDevice.createTextBuffer(fontOptions, 90);
+        posMinus = Matrix4x4.createTranslation(0, -150, 0);
+
         //Credits
         fontCredits = graphicsDevice.createSpriteFont(null, 90);
         textCredits1 = graphicsDevice.createTextBuffer(fontCredits, 90);
@@ -378,8 +398,10 @@ public class SokobanGame extends Game {
 
                             if (screen == Screen.MENU) {
                                 detectMenuTouch(touchPoint);
-                            } else {
+                            } else if (screen == Screen.GAME){
                                 detectPaddleTouchDown(touchPoint);
+                            } else if (screen == Screen.OPTIONS) {
+                                detectOptionsTouch(touchPoint);
                             }
 
 
@@ -594,6 +616,16 @@ public class SokobanGame extends Game {
                 }
             }
         }
+    }
+
+    private void detectOptionsTouch(Point touchPoint) {
+       if (touchPoint.intersects(aabbplus)) {
+           MAX_MATCHPOINTS += 1;
+       } else if (touchPoint.intersects(aabbminus)) {
+           if(MAX_MATCHPOINTS > 1) {
+               MAX_MATCHPOINTS -= 1;
+           }
+       }
     }
 
     private void parseMenuEntry(MenuEntry entry) {
@@ -899,6 +931,20 @@ public class SokobanGame extends Game {
     private void drawOptions() {
         textTitle.setText("Options");
         renderer.drawText(textTitle, posTitle);
+
+        textOptions.setText("Maximale Matchpoints: " + MAX_MATCHPOINTS);
+        renderer.drawText(textOptions, posOptions);
+
+        textPlus.setText("+");
+        renderer.drawText(textPlus, posPlus);
+        textMinus.setText("-");
+        renderer.drawText(textMinus, posMinus);
+
+        float[] boundsPlus = textPlus.getBounds();
+        aabbplus = new AABB(0, 150, boundsPlus[0], boundsPlus[1]);
+
+        float[] boundsMinus = textPlus.getBounds();
+        aabbminus = new AABB(0, -150, boundsMinus[0], boundsMinus[1]);
     }
 
     private void drawHighscore() {
