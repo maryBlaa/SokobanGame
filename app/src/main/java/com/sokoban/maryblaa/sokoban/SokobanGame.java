@@ -472,7 +472,7 @@ public class SokobanGame extends Game {
                 }
             case GAMEOVER:
 
-                int winner = scoreP1 > scoreP2 ? 1 : 2;
+                String winner = scoreP1 > scoreP2 ? nameP1 : nameP2;
                 try {
                     // load last winners
                     JSONObject oldHighscore;
@@ -581,7 +581,7 @@ public class SokobanGame extends Game {
         return sortedJsonArray;
     }
 
-    private void createStats(int winner, JSONArray scoresArray) throws JSONException {
+    private void createStats(String winner, JSONArray scoresArray) throws JSONException {
         JSONObject tmpStats = new JSONObject();
         tmpStats.put("player", winner);
         tmpStats.put("time", scoreTime);
