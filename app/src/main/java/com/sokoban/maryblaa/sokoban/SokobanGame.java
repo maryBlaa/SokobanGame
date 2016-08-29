@@ -185,7 +185,7 @@ public class SokobanGame extends Game {
         }
 
         private boolean isVisible() {
-            return this != RESUME || gameState == GameState.PAUSED;
+            return this != RESUME || gameState == GameState.PAUSED || gameState == GameState.MATCHPOINT;
         }
     }
 
@@ -751,12 +751,14 @@ public class SokobanGame extends Game {
 
 
     private void drawGame() {
-        currentDeltaTime = getDeltaTime();
-
         if (gameState == GameState.PLAYING) {
+            currentDeltaTime = getDeltaTime();
+
+            //AI Movement only in AIGame
             if (isAIGame) {
                 aiPaddleMove();
             }
+
             frame++;
 
             if (currentDeltaTime > 0) {
@@ -765,12 +767,9 @@ public class SokobanGame extends Game {
 
             textTimeCounter.setText((currentDeltaTime / 1000) + "s, " + (int) (fpms * 1000) + " fps");
             renderer.drawText(textTimeCounter, posTitle);
-        }
 
-        float distance;
-
-        // Collisiondetection Paddle Ball
-        if (gameState == GameState.PLAYING) {
+            // Collisiondetection Paddle Ball
+            float distance;
             double speed = speedVariation * (largestWidth / (fpms * BASE_SPEED));
             ballPositionX += speed * Math.sin(Math.toRadians(ballAngle));
             ballPositionY += speed * Math.cos(Math.toRadians(ballAngle));
@@ -832,6 +831,7 @@ public class SokobanGame extends Game {
         } else if (gameState == GameState.GAMEOVER) {
             drawGameover();
         } else {
+            resetDeltaTimeCounter();
             textScore.setText(scoreP1 + " : " + scoreP2);
             renderer.drawText(textScore, posTitle);
         }
