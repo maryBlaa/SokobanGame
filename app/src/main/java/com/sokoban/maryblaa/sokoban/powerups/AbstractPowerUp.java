@@ -14,13 +14,13 @@ public abstract class AbstractPowerUp {
 
     public enum PowerupType {
 
-        BALLENLARGER("ball.jpg", "ownBall.obj"),
-        PADDLEENLARGER("ball.jpg", "ownBall.obj"),
-        BALLSHRINKER("ball.jpg", "ownBall.obj"),
-        PADDLESHRINKER("ball.jpg", "ownBall.obj"),
-        SPEEDUP("ball.jpg", "ownBall.obj"),
-        SLOWDOWN("ball.jpg", "ownBall.obj"),
-        BLINK("ball.jpg", "ownBall.obj"),
+        BALLENLARGER("enlarger.png", "ownBall.obj"),
+        PADDLEENLARGER("enlarger.png", "ownBall.obj"),
+        BALLSHRINKER("shrinker.png", "ownBall.obj"),
+        PADDLESHRINKER("shrinker.png", "ownBall.obj"),
+        SPEEDUP("speedup.png", "ownBall.obj"),
+        SLOWDOWN("slowdown.png", "ownBall.obj"),
+        BLINK("blink.png", "ownBall.obj"),
         PADDLEDIRECTIONINVERSER("ball.jpg", "ownBall.obj"),
         DUPLICATEBALL("ball.jpg", "ownBall.obj");
 
