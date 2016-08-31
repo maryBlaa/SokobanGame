@@ -13,7 +13,7 @@ public class Ball {
     public float BASE_SIZE = 70f;
 
     // base speed: 2000ms for largest width
-    public static int BASE_SPEED = 3000;
+    public static int BASE_SPEED = 2000;
     public double speedVariation = 1;
 
     public boolean isBallBlinking = false;
