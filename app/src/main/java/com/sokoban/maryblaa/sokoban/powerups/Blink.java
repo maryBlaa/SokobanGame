@@ -7,29 +7,21 @@ public class Blink extends AbstractPowerUp {
 
     // Blinks per second
     public static final int BLINK_DURATION_MS = 589;
+    Ball ball;
 
-    public Blink(SokobanGame game) {
+    public Blink(SokobanGame game, Ball ball) {
         super(game);    // Congratulations
+        this.ball = ball;
     }
 
     @Override
     public void performAction() {
-
-    }
-
-    @Override
-    public void undoAction() {
-
-    }
-
-    @Override
-    public void performAction(Ball ball) {
         ball.setBallBlinking(true);
         ball.setBlinkStartDeltaTime(game.currentDeltaTime);
     }
 
     @Override
-    public void undoAction(Ball ball) {
+    public void undoAction() {
         ball.setBallBlinking(false);
     }
 }

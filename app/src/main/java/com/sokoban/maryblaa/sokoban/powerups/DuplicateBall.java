@@ -23,13 +23,4 @@ public class DuplicateBall extends AbstractPowerUp {
         game.toBeDeletedBalls.add(ball);
     }
 
-    @Override
-    public void performAction(Ball ball) {
-
-    }
-
-    @Override
-    public void undoAction(Ball ball) {
-
-    }
 }
