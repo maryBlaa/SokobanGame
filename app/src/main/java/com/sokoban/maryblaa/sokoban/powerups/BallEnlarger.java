@@ -1,10 +1,8 @@
 package com.sokoban.maryblaa.sokoban.powerups;
 
 import com.sokoban.maryblaa.sokoban.SokobanGame;
+import com.sokoban.maryblaa.sokoban.objects.Ball;
 
-/**
- * Created by DragooNick on 05.07.2016.
- */
 public class BallEnlarger extends AbstractPowerUp {
 
     private static final float BALLSIZE = 25f;
@@ -15,12 +13,22 @@ public class BallEnlarger extends AbstractPowerUp {
 
     @Override
     public void performAction() {
-        game.ballSize += BALLSIZE;
+
     }
 
     @Override
     public void undoAction() {
-        game.ballSize -= BALLSIZE;
+
+    }
+
+    @Override
+    public void performAction(Ball ball) {
+        ball.BASE_SIZE += BALLSIZE;
+    }
+
+    @Override
+    public void undoAction(Ball ball) {
+        ball.BASE_SIZE -= BALLSIZE;
 
     }
 }

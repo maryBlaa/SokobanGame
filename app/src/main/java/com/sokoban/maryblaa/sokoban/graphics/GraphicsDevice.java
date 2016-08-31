@@ -14,9 +14,6 @@ import java.security.InvalidParameterException;
 
 import javax.microedition.khronos.opengles.GL10;
 
-/**
- * Created by maryBlaa on 02.02.2016.
- */
 public class GraphicsDevice {
 
     private GL10 gl;

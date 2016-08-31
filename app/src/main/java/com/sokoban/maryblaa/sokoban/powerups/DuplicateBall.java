@@ -1,11 +1,11 @@
 package com.sokoban.maryblaa.sokoban.powerups;
 
 import com.sokoban.maryblaa.sokoban.SokobanGame;
+import com.sokoban.maryblaa.sokoban.objects.Ball;
 
-/**
- * Created by DragooNick on 05.07.2016.
- */
 public class DuplicateBall extends AbstractPowerUp {
+
+    Ball ball;
 
     public DuplicateBall(SokobanGame game) {
         super(game);    // Congratulations
@@ -13,11 +13,23 @@ public class DuplicateBall extends AbstractPowerUp {
 
     @Override
     public void performAction() {
-
+        ball = new Ball(game);
+        ball.setSecondBall(powerUpPositionX, powerUpPositionY);
+        game.balls.add(ball);
     }
 
     @Override
     public void undoAction() {
+        game.toBeDeletedBalls.add(ball);
+    }
+
+    @Override
+    public void performAction(Ball ball) {
+
+    }
+
+    @Override
+    public void undoAction(Ball ball) {
 
     }
 }

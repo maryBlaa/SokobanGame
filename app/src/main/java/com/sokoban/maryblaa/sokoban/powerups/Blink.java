@@ -1,10 +1,8 @@
 package com.sokoban.maryblaa.sokoban.powerups;
 
 import com.sokoban.maryblaa.sokoban.SokobanGame;
+import com.sokoban.maryblaa.sokoban.objects.Ball;
 
-/**
- * Created by DragooNick on 05.07.2016.
- */
 public class Blink extends AbstractPowerUp {
 
     // Blinks per second
@@ -16,12 +14,22 @@ public class Blink extends AbstractPowerUp {
 
     @Override
     public void performAction() {
-        game.isBallBlinking = true;
-        game.blinkStartDeltaTime = game.currentDeltaTime;
+
     }
 
     @Override
     public void undoAction() {
-        game.isBallBlinking = false;
+
+    }
+
+    @Override
+    public void performAction(Ball ball) {
+        ball.isBallBlinking = true;
+        ball.blinkStartDeltaTime = game.currentDeltaTime;
+    }
+
+    @Override
+    public void undoAction(Ball ball) {
+        ball.isBallBlinking = false;
     }
 }

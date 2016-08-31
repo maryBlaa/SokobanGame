@@ -6,10 +6,8 @@ import com.sokoban.maryblaa.sokoban.graphics.Material;
 import com.sokoban.maryblaa.sokoban.graphics.Mesh;
 import com.sokoban.maryblaa.sokoban.graphics.Texture;
 import com.sokoban.maryblaa.sokoban.math.Matrix4x4;
+import com.sokoban.maryblaa.sokoban.objects.Ball;
 
-/**
- * Created by DragooNick on 05.07.2016.
- */
 public abstract class AbstractPowerUp {
 
     public enum PowerupType {
@@ -51,11 +49,14 @@ public abstract class AbstractPowerUp {
 
     public abstract void performAction();
     public abstract void undoAction();
+    public abstract void performAction(Ball ball);
+    public abstract void undoAction(Ball ball);
 
     public static AbstractPowerUp spawn(SokobanGame game) {
         int powerupTypeIndex = MathHelper.randomInt(0, PowerupType.values().length - 1);
         PowerupType type = PowerupType.values()[powerupTypeIndex];
 
+        type =PowerupType.DUPLICATEBALL;
         AbstractPowerUp powerup;
         switch (type) {
 
@@ -82,6 +83,9 @@ public abstract class AbstractPowerUp {
                 break;
             case PADDLEDIRECTIONINVERSER:
                 powerup = new PaddleDirectionInverser(game);
+                break;
+            case DUPLICATEBALL:
+                powerup = new DuplicateBall(game);
                 break;
             default:
                 return null; // this should never happen until the sun eats the earth
@@ -116,13 +120,13 @@ public abstract class AbstractPowerUp {
     };
 
     // distance between centerns (ball and power up) has to be smaller than added radii (it's real, you can google it)
-    public boolean catchPowerUp() {
-        double distanceX = game.ballPositionX - powerUpPositionX;
-        double distanceY = game.ballPositionY - powerUpPositionY;
+    public boolean catchPowerUp(Ball ball) {
+        double distanceX = ball.ballPositionX - powerUpPositionX;
+        double distanceY = ball.ballPositionY - powerUpPositionY;
 
         double distance = Math.sqrt(Math.pow(distanceX, 2) + Math.pow(distanceY, 2));
 
-        boolean isCaught = distance < game.ballSize + powerUpSize;
+        boolean isCaught = distance < ball.BASE_SIZE + powerUpSize;
         if(isCaught) {
             powerDownDeltaTime = game.currentDeltaTime + LIFETIME_MS;
         }
@@ -130,7 +134,7 @@ public abstract class AbstractPowerUp {
     }
 
     protected int paddleIndex;
-    protected int getPaddleIndex() {
-        return game.ballAngle > 180 ? 1 : 0;
+    protected int getPaddleIndex(Ball ball) {
+        return ball.ballAngle > 180 ? 1 : 0;
     }
 }

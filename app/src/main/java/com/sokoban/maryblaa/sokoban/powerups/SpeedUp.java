@@ -1,10 +1,8 @@
 package com.sokoban.maryblaa.sokoban.powerups;
 
 import com.sokoban.maryblaa.sokoban.SokobanGame;
+import com.sokoban.maryblaa.sokoban.objects.Ball;
 
-/**
- * Created by DragooNick on 05.07.2016.
- */
 public class SpeedUp extends AbstractPowerUp {
 
     public SpeedUp(SokobanGame game) {
@@ -15,11 +13,21 @@ public class SpeedUp extends AbstractPowerUp {
 
     @Override
     public void performAction() {
-        game.speedVariation *= SPEEDUP;
+
     }
 
     @Override
     public void undoAction() {
-        game.speedVariation /= SPEEDUP;
+
+    }
+
+    @Override
+    public void performAction(Ball ball) {
+        ball.speedVariation *= SPEEDUP;
+    }
+
+    @Override
+    public void undoAction(Ball ball) {
+        ball.speedVariation /= SPEEDUP;
     }
 }

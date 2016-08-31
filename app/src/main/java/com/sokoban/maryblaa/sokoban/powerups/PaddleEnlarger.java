@@ -1,10 +1,8 @@
 package com.sokoban.maryblaa.sokoban.powerups;
 
 import com.sokoban.maryblaa.sokoban.SokobanGame;
+import com.sokoban.maryblaa.sokoban.objects.Ball;
 
-/**
- * Created by DragooNick on 05.07.2016.
- */
 public class PaddleEnlarger extends AbstractPowerUp {
 
     private static final float PADDLESIZE = 25f;
@@ -15,13 +13,23 @@ public class PaddleEnlarger extends AbstractPowerUp {
 
     @Override
     public void performAction() {
-        paddleIndex = getPaddleIndex();
+
+    }
+
+    @Override
+    public void undoAction() {
+
+    }
+
+    @Override
+    public void performAction(Ball ball) {
+        paddleIndex = getPaddleIndex(ball);
         game.paddleSizes[paddleIndex] += PADDLESIZE;
         game.calculateWorldPaddle(paddleIndex);
     }
 
     @Override
-    public void undoAction() {
+    public void undoAction(Ball ball) {
         game.paddleSizes[paddleIndex] -= PADDLESIZE;
         game.calculateWorldPaddle(paddleIndex);
     }

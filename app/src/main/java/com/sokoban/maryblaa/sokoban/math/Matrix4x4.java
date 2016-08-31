@@ -2,9 +2,6 @@ package com.sokoban.maryblaa.sokoban.math;
 
 import android.opengl.Matrix;
 
-/**
- * Created by maryf on 02.02.2016.
- */
 public class Matrix4x4 {
 
     public float[] m = new float[16];
