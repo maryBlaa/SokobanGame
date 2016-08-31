@@ -8,9 +8,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
- * Created by maryBlaa on 28.08.2016.
- * see on
- * http://stackoverflow.com/questions/3876680/is-it-possible-to-add-an-array-or-object-to-sharedpreferences-on-android
+ * see @ http://stackoverflow.com/questions/3876680/is-it-possible-to-add-an-array-or-object-to-sharedpreferences-on-android
  */
 public class JSONSharedPreferences {
     private static final String PREFIX = "json";

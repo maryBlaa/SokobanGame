@@ -13,9 +13,6 @@ import java.util.Map;
 import java.util.Set;
 
 
-/**
- * Helper class to provide simple access to Shared Preferences
- */
 public class Prefs {
     private static final String TAG = Prefs.class.getSimpleName();
     private static final String SHARED_PREF_FILE = "sokoban.pref";
