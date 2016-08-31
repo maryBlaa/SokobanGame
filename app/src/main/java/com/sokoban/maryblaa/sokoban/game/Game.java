@@ -11,9 +11,6 @@ import com.sokoban.maryblaa.sokoban.input.InputSystem;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
-/**
- * Created by maryBlaa on 02.02.2016.
- */
 public abstract class Game implements Renderer {
 
     private boolean initialized;

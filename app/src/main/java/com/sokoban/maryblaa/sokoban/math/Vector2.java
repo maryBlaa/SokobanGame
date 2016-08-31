@@ -1,8 +1,5 @@
 package com.sokoban.maryblaa.sokoban.math;
 
-/**
- * Created by maryf on 02.02.2016.
- */
 public class Vector2 {
 
     public float[] v = new float[2];

@@ -1,8 +1,5 @@
 package com.sokoban.maryblaa.sokoban.input;
 
-/**
- * Created by maryf on 20.02.2016.
- */
 public class InputEvent {
 
     public enum InputDevice {

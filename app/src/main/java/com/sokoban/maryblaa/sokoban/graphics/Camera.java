@@ -4,9 +4,6 @@ import com.sokoban.maryblaa.sokoban.math.Matrix4x4;
 import com.sokoban.maryblaa.sokoban.math.Vector3;
 import com.sokoban.maryblaa.sokoban.math.Vector4;
 
-/**
- * Created by maryf on 02.02.2016.
- */
 public class Camera {
 
     private Matrix4x4 projection;

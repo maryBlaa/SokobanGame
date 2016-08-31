@@ -14,9 +14,6 @@ import com.sokoban.maryblaa.sokoban.input.InputEvent.InputDevice;
 import java.util.Queue;
 import java.util.concurrent.ArrayBlockingQueue;
 
-/**
- * Created by maryf on 20.02.2016.
- */
 public class InputSystem implements View.OnKeyListener, View.OnTouchListener, SensorEventListener {
 
 

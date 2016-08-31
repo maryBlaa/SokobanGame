@@ -2,9 +2,6 @@ package com.sokoban.maryblaa.sokoban.graphics;
 
 import java.nio.ByteBuffer;
 
-/**
- * Created by maryBlaa on 02.02.2016.
- */
 public class VertexBuffer {
 
     private int numVertices;

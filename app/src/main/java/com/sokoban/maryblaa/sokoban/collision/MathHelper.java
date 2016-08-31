@@ -1,8 +1,5 @@
 package com.sokoban.maryblaa.sokoban.collision;
 
-/**
- * Created by maryf on 16.05.2016.
- */
 public class MathHelper {
 
     public static float clamp(float value, float min, float max) {

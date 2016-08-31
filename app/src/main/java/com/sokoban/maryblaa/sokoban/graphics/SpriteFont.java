@@ -14,9 +14,6 @@ import java.io.FileOutputStream;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Created by maryf on 09.02.2016.
- */
 public class SpriteFont {
 
     private Material material;

@@ -1,8 +1,5 @@
 package com.sokoban.maryblaa.sokoban.graphics;
 
-/**
- * Created by maryf on 02.02.2016.
- */
 public class VertexElement {
 
     public enum VertexSemantic {

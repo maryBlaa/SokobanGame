@@ -7,9 +7,6 @@ import java.nio.ByteOrder;
 
 import javax.microedition.khronos.opengles.GL10;
 
-/**
- * Created by maryBlaa on 02.02.2016.
- */
 public class SokobanRenderer {
 
     private GraphicsDevice graphicsDevice;

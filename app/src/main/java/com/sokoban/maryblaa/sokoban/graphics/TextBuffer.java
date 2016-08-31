@@ -6,9 +6,6 @@ import java.util.Map;
 
 import javax.microedition.khronos.opengles.GL10;
 
-/**
- * Created by maryf on 09.02.2016.
- */
 public class TextBuffer {
 
     private Mesh mesh;

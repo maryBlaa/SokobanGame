@@ -11,9 +11,6 @@ import java.util.Vector;
 
 import javax.microedition.khronos.opengles.GL10;
 
-/**
- * Created by maryBlaa on 02.02.2016.
- */
 public class Mesh {
 
     private int mode;
