@@ -82,7 +82,7 @@ public abstract class AbstractPowerUp {
                 powerup = new PaddleDirectionInverser(game, ball);
                 break;
             case DUPLICATEBALL:
-                powerup = new DuplicateBall(game, ball);
+                powerup = new DuplicateBall(game);
                 break;
             default:
                 return null; // this should never happen until the sun eats the earth
