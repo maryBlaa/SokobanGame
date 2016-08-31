@@ -24,12 +24,12 @@ public class Blink extends AbstractPowerUp {
 
     @Override
     public void performAction(Ball ball) {
-        ball.isBallBlinking = true;
-        ball.blinkStartDeltaTime = game.currentDeltaTime;
+        ball.setBallBlinking(true);
+        ball.setBlinkStartDeltaTime(game.currentDeltaTime);
     }
 
     @Override
     public void undoAction(Ball ball) {
-        ball.isBallBlinking = false;
+        ball.setBallBlinking(false);
     }
 }

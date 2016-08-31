@@ -606,12 +606,30 @@ public class SokobanGame extends Game {
     private void aiPaddleMove() {
 
 //        long aiReaction = reactionTime + MathHelper.randomInt(300, 500);
-        if (gameState != GameState.PLAYING && balls.get(0).ballAngle > 180) {
+
+        // perfect AI
+        if (gameState != GameState.PLAYING) {
             return;
         }
 
-            float newPaddlePosition;
-            newPaddlePosition = balls.get(0).ballPositionY;
+        float newPaddlePosition = 0;
+        float biggestXPosition = 0;
+
+        for(Ball ball : balls) {
+
+            if(ball.getBallAngle() > 180) {
+                return;
+            }
+            if(ball.getBallPositionX() > biggestXPosition) {
+                newPaddlePosition = ball.getBallPositionY();
+                biggestXPosition = newPaddlePosition;
+                Log.d(TAG, "" + newPaddlePosition);
+            } else if (biggestXPosition == 0) { // init values
+                Log.d(TAG, "" + biggestXPosition);
+                biggestXPosition = ball.getBallPositionY();
+            }
+        }
+
 //        if (true) {
 //            if (ballPositionY >= 0) {
 //                if (Math.abs(newPaddlePosition) < screenHeight / 2 - paddleSizes[1])
@@ -761,9 +779,9 @@ public class SokobanGame extends Game {
                 // Collisiondetection Paddle Ball
                 maxPosition = paddleTranslationX - ball.BASE_SIZE;
                 float distance;
-                if (ball.ballPositionX > maxPosition + paddleSizes[1] * 0.2) {
+                if (ball.getBallPositionX() > maxPosition + paddleSizes[1] * 0.2) {
                     // right Paddle
-                    distance = ball.ballPositionY - paddlePositions[1];
+                    distance = ball.getBallPositionY() - paddlePositions[1];
                     if (Math.abs(distance) > paddleSizes[1]) {
                         scoreP1 += 1;
                         scoreTime += (currentDeltaTime / 1000);
@@ -772,14 +790,14 @@ public class SokobanGame extends Game {
                     } else {
                         turnAround(distance, false, ball);
                     }
-                } else if (ball.ballPositionX > maxPosition) {
-                    distance = ball.ballPositionY - paddlePositions[1];
+                } else if (ball.getBallPositionX() > maxPosition) {
+                    distance = ball.getBallPositionY() - paddlePositions[1];
                     if (Math.abs(distance) <= paddleSizes[1]) {
                         turnAround(distance, false, ball);
                     }
-                } else if (ball.ballPositionX < -maxPosition - paddleSizes[0] * 0.2) {
+                } else if (ball.getBallPositionX() < -maxPosition - paddleSizes[0] * 0.2) {
                     // left Paddle
-                    distance = ball.ballPositionY - paddlePositions[0];
+                    distance = ball.getBallPositionY() - paddlePositions[0];
                     if (Math.abs(distance) > paddleSizes[0]) {
                         scoreTime += (currentDeltaTime / 1000);
                         scoreP2 += 1;
@@ -788,9 +806,9 @@ public class SokobanGame extends Game {
                     } else {
                         turnAround(distance, true, ball);
                     }
-                } else if (ball.ballPositionX < -maxPosition) {
+                } else if (ball.getBallPositionX() < -maxPosition) {
 
-                    distance = ball.ballPositionY - paddlePositions[0];
+                    distance = ball.getBallPositionY() - paddlePositions[0];
                     if (Math.abs(distance) <= paddleSizes[0]) {
                         turnAround(distance, true, ball);
                     }
@@ -798,12 +816,12 @@ public class SokobanGame extends Game {
                     collisionDetectionActive = true;
                 }
 
-                if (Math.abs(ball.ballPositionY) > screenHeight / 2 - ball.BASE_SIZE) {
-                    if (ball.ballAngle > 0 * Math.PI && ball.ballAngle < Math.PI) {
-                        ball.ballAngle = ((90 + (90 - ball.ballAngle)) % 360);
+                if (Math.abs(ball.getBallPositionY()) > screenHeight / 2 - ball.BASE_SIZE) {
+                    if (ball.getBallAngle() > 0 * Math.PI && ball.getBallAngle() < Math.PI) {
+                        ball.setBallAngle(((90 + (90 - ball.getBallAngle())) % 360));
 
                     } else {
-                        ball.ballAngle = ((270 + (270 - ball.ballAngle)) % 360);
+                        ball.setBallAngle(((270 + (270 - ball.getBallAngle())) % 360));
                     }
 
                     if (bounce3.isPlaying()) {
@@ -885,9 +903,9 @@ public class SokobanGame extends Game {
         float percentage = distance / paddleSizes[isLeft ? 0 : 1];
         float newAngle = percentage * 65;
         if (!isLeft) {
-            ball.ballAngle = 270 + newAngle;
+            ball.setBallAngle(270 + newAngle);
         } else {
-            ball.ballAngle = 90 - newAngle;
+            ball.setBallAngle(90 - newAngle);
         }
         collisionDetectionActive = false;
 

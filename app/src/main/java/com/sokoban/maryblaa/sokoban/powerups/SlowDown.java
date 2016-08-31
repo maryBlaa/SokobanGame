@@ -23,11 +23,11 @@ public class SlowDown extends AbstractPowerUp {
 
     @Override
     public void performAction(Ball ball) {
-        ball.speedVariation *= SLOWDOWN;
+        ball.setSpeedVariation(ball.getSpeedVariation() * SLOWDOWN);
     }
 
     @Override
     public void undoAction(Ball ball) {
-        ball.speedVariation /= SLOWDOWN;
+        ball.setSpeedVariation(ball.getSpeedVariation() / SLOWDOWN);
     }
 }

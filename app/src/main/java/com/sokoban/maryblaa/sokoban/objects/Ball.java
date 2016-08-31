@@ -13,15 +13,15 @@ public class Ball {
     public float BASE_SIZE = 70f;
 
     // base speed: 2000ms for largest width
-    public static int BASE_SPEED = 2000;
-    public double speedVariation = 1;
+    private static int BASE_SPEED = 2000;
+    private double speedVariation = 1;
 
-    public boolean isBallBlinking = false;
-    public int blinkStartDeltaTime = 0;
+    private boolean isBallBlinking = false;
+    private int blinkStartDeltaTime = 0;
 
-    public float ballPositionX = 0;
-    public float ballPositionY = 0;
-    public float ballAngle;
+    private float ballPositionX = 0;
+    private float ballPositionY = 0;
+    private float ballAngle;
 
     public Ball (SokobanGame game) {
         this.game = game;
@@ -71,5 +71,45 @@ public class Ball {
         ballPositionX = x;
         ballPositionY = y;
         speedVariation = 0.5;
+    }
+
+    public float getBallPositionX() {
+        return ballPositionX;
+    }
+
+    public double getSpeedVariation() {
+        return speedVariation;
+    }
+
+    public boolean isBallBlinking() {
+        return isBallBlinking;
+    }
+
+    public int getBlinkStartDeltaTime() {
+        return blinkStartDeltaTime;
+    }
+
+    public float getBallPositionY() {
+        return ballPositionY;
+    }
+
+    public float getBallAngle() {
+        return ballAngle;
+    }
+
+    public void setBallAngle(float ballAngle) {
+        this.ballAngle = ballAngle;
+    }
+
+    public void setBallBlinking(boolean ballBlinking) {
+        isBallBlinking = ballBlinking;
+    }
+
+    public void setBlinkStartDeltaTime(int blinkStartDeltaTime) {
+        this.blinkStartDeltaTime = blinkStartDeltaTime;
+    }
+
+    public void setSpeedVariation(double speedVariation) {
+        this.speedVariation = speedVariation;
     }
 }

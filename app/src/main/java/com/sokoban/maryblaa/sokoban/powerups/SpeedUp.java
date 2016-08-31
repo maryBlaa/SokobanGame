@@ -23,11 +23,11 @@ public class SpeedUp extends AbstractPowerUp {
 
     @Override
     public void performAction(Ball ball) {
-        ball.speedVariation *= SPEEDUP;
+        ball.setSpeedVariation(ball.getSpeedVariation() * SPEEDUP);
     }
 
     @Override
     public void undoAction(Ball ball) {
-        ball.speedVariation /= SPEEDUP;
+        ball.setSpeedVariation(ball.getSpeedVariation() / SPEEDUP);
     }
 }

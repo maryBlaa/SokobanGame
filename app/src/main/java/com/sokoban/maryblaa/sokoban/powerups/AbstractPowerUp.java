@@ -19,8 +19,8 @@ public abstract class AbstractPowerUp {
         SPEEDUP("speedup.png", "ownBall.obj"),
         SLOWDOWN("slowdown.png", "ownBall.obj"),
         BLINK("blink.png", "ownBall.obj"),
-        PADDLEDIRECTIONINVERSER("ball.jpg", "ownBall.obj"),
-        DUPLICATEBALL("ball.jpg", "ownBall.obj");
+        PADDLEDIRECTIONINVERSER("inverse.png", "ownBall.obj"),
+        DUPLICATEBALL("duplicate.png", "ownBall.obj");
 
         public String materialSrc;
         public String meshSrc;
@@ -56,7 +56,6 @@ public abstract class AbstractPowerUp {
         int powerupTypeIndex = MathHelper.randomInt(0, PowerupType.values().length - 1);
         PowerupType type = PowerupType.values()[powerupTypeIndex];
 
-        type =PowerupType.DUPLICATEBALL;
         AbstractPowerUp powerup;
         switch (type) {
 
@@ -121,8 +120,8 @@ public abstract class AbstractPowerUp {
 
     // distance between centerns (ball and power up) has to be smaller than added radii (it's real, you can google it)
     public boolean catchPowerUp(Ball ball) {
-        double distanceX = ball.ballPositionX - powerUpPositionX;
-        double distanceY = ball.ballPositionY - powerUpPositionY;
+        double distanceX = ball.getBallPositionX() - powerUpPositionX;
+        double distanceY = ball.getBallPositionY() - powerUpPositionY;
 
         double distance = Math.sqrt(Math.pow(distanceX, 2) + Math.pow(distanceY, 2));
 
@@ -135,6 +134,6 @@ public abstract class AbstractPowerUp {
 
     protected int paddleIndex;
     protected int getPaddleIndex(Ball ball) {
-        return ball.ballAngle > 180 ? 1 : 0;
+        return ball.getBallAngle() > 180 ? 1 : 0;
     }
 }
