@@ -161,6 +161,10 @@ public class SokobanGame extends Game {
     private int scoreTime = 0;
     private AABB aabbplus;
     private AABB aabbminus;
+    private Mesh meshBackground;
+    private Texture texBackground;
+    private Material materialBackground;
+    private Matrix4x4 worldBackground;
 //    private long reactionTime;
 
     private enum GameState {
@@ -210,6 +214,12 @@ public class SokobanGame extends Game {
         sceneCamera = new Camera();
         sceneCamera.setProjection(projection);
         sceneCamera.setView(view);
+
+        materialBackground = new Material();
+
+        worldBackground = new Matrix4x4();
+        worldBackground.scale(5500, 1000, 0);
+        worldBackground.translateBy(0, 0, -1000f);
 
         materialBall = new Material();
         materialBall.setAlphaTestFunction(CompareFunction.GREATER);
@@ -263,6 +273,13 @@ public class SokobanGame extends Game {
     public void loadContent() {
         try {
             InputStream stream;
+
+            stream = context.getAssets().open("background.obj");
+            meshBackground = Mesh.loadFromOBJ(stream);
+
+            stream = context.getAssets().open("background.jpg");
+            texBackground = graphicsDevice.createTexture(stream);
+            materialBackground.setTexture(texBackground);
 
             stream = context.getAssets().open("ownBall.obj");
             meshBall = Mesh.loadFromOBJ(stream);
@@ -613,8 +630,15 @@ public class SokobanGame extends Game {
             return;
         }
 
-            float newPaddlePosition;
-            newPaddlePosition = ballPositionY;
+        // perfect AI
+        float newPaddlePosition;
+        newPaddlePosition = ballPositionY;
+
+        if (Math.abs(newPaddlePosition) < screenHeight / 2 - paddleSizes[1]) {
+            paddlePositions[1] = newPaddlePosition;
+            calculateWorldPaddle(1);
+        }
+
 //        if (true) {
 //            if (ballPositionY >= 0) {
 //                if (Math.abs(newPaddlePosition) < screenHeight / 2 - paddleSizes[1])
@@ -629,10 +653,7 @@ public class SokobanGame extends Game {
 //                    calculateWorldPaddle(1);
 //                }
 //            }
-            if (Math.abs(newPaddlePosition) < screenHeight / 2 - paddleSizes[1]) {
-                paddlePositions[1] = newPaddlePosition;
-                calculateWorldPaddle(1);
-            }
+
 //            reactionTime = 0;
 //        } else {
 //            return;
@@ -750,6 +771,11 @@ public class SokobanGame extends Game {
 
 
     private void drawGame() {
+
+
+        // draw background
+        renderer.drawMesh(meshBackground, materialBackground, worldBackground);
+
         if (gameState == GameState.PLAYING) {
             currentDeltaTime = getDeltaTime();
 
@@ -845,6 +871,7 @@ public class SokobanGame extends Game {
         for (Matrix4x4 worldPaddle : worldPaddles) {
             renderer.drawMesh(meshPaddle, materialPaddle, worldPaddle);
         }
+
     }
 
     private void removeExpiredPowerUp() {
@@ -956,6 +983,7 @@ public class SokobanGame extends Game {
     }
 
     private void drawMenu() {
+
         textTitle.setText("Sokoban");
         if (!introPlayed) {
             introPlayed = true;
@@ -963,8 +991,9 @@ public class SokobanGame extends Game {
         }
         graphicsDevice.setCamera(hudCamera);
         renderer.drawText(textTitle, posTitle);
-//            renderer.drawRect(textTitle.getBounds(),textTitle.getSpriteFont().getMaterial(), posTitle);
 
+
+//            renderer.drawRect(textTitle.getBounds(),textTitle.getSpriteFont().getMaterial(), posTitle);
 
         for (int i = 0; i < textMenu.length; ++i)
             if (MenuEntry.values()[i].isVisible()) {
