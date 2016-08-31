@@ -5,28 +5,21 @@ import com.sokoban.maryblaa.sokoban.objects.Ball;
 
 public class PaddleDirectionInverser extends AbstractPowerUp {
 
-    public PaddleDirectionInverser(SokobanGame game) {
+    Ball ball;
+
+    public PaddleDirectionInverser(SokobanGame game, Ball ball) {
         super(game);    // Congratulations
+        this.ball = ball;
     }
 
     @Override
     public void performAction() {
-
-    }
-
-    @Override
-    public void undoAction() {
-
-    }
-
-    @Override
-    public void performAction(Ball ball) {
         paddleIndex = getPaddleIndex(ball);
         game.paddleInverse[paddleIndex] = true;
     }
 
     @Override
-    public void undoAction(Ball ball) {
+    public void undoAction() {
         game.paddleInverse[paddleIndex] = false;
     }
 

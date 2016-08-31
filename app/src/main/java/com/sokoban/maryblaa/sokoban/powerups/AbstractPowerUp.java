@@ -49,10 +49,8 @@ public abstract class AbstractPowerUp {
 
     public abstract void performAction();
     public abstract void undoAction();
-    public abstract void performAction(Ball ball);
-    public abstract void undoAction(Ball ball);
 
-    public static AbstractPowerUp spawn(SokobanGame game) {
+    public static AbstractPowerUp spawn(SokobanGame game, Ball ball) {
         int powerupTypeIndex = MathHelper.randomInt(0, PowerupType.values().length - 1);
         PowerupType type = PowerupType.values()[powerupTypeIndex];
 
@@ -60,31 +58,31 @@ public abstract class AbstractPowerUp {
         switch (type) {
 
             case BALLENLARGER:
-                powerup = new BallEnlarger(game);
+                powerup = new BallEnlarger(game, ball);
                 break;
             case PADDLEENLARGER:
-                powerup = new PaddleEnlarger(game);
+                powerup = new PaddleEnlarger(game, ball);
                 break;
             case BALLSHRINKER:
-                powerup = new BallShrinker(game);
+                powerup = new BallShrinker(game, ball);
                 break;
             case PADDLESHRINKER:
-                powerup = new PaddleShrinker(game);
+                powerup = new PaddleShrinker(game, ball);
                 break;
             case SPEEDUP:
-                powerup = new SpeedUp(game);
+                powerup = new SpeedUp(game, ball);
                 break;
             case SLOWDOWN:
-                powerup = new SlowDown(game);
+                powerup = new SlowDown(game, ball);
                 break;
             case BLINK:
-                powerup = new Blink(game);
+                powerup = new Blink(game, ball);
                 break;
             case PADDLEDIRECTIONINVERSER:
-                powerup = new PaddleDirectionInverser(game);
+                powerup = new PaddleDirectionInverser(game, ball);
                 break;
             case DUPLICATEBALL:
-                powerup = new DuplicateBall(game);
+                powerup = new DuplicateBall(game, ball);
                 break;
             default:
                 return null; // this should never happen until the sun eats the earth

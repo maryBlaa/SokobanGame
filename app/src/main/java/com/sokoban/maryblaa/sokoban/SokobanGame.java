@@ -867,7 +867,7 @@ public class SokobanGame extends Game {
 
     private void drawPowerUp(Ball ball) {
         if (shouldSpawn()) {
-            visiblePowerup = AbstractPowerUp.spawn(this);
+            visiblePowerup = AbstractPowerUp.spawn(this, ball);
         }
         if (visiblePowerup != null) {
 
