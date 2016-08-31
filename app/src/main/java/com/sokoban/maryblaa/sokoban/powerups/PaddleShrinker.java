@@ -5,31 +5,23 @@ import com.sokoban.maryblaa.sokoban.objects.Ball;
 
 public class PaddleShrinker extends AbstractPowerUp {
 
+    Ball ball;
     private static final float PADDLESIZE = 25f;
 
-    public PaddleShrinker(SokobanGame game) {
+    public PaddleShrinker(SokobanGame game, Ball ball) {
         super(game);    // Congratulations
+        this.ball = ball;
     }
 
     @Override
     public void performAction() {
-
-    }
-
-    @Override
-    public void undoAction() {
-
-    }
-
-    @Override
-    public void performAction(Ball ball) {
         paddleIndex = getPaddleIndex(ball);
         game.paddleSizes[paddleIndex] -= PADDLESIZE;
         game.calculateWorldPaddle(paddleIndex);
     }
 
     @Override
-    public void undoAction(Ball ball) {
+    public void undoAction() {
         game.paddleSizes[paddleIndex] += PADDLESIZE;
         game.calculateWorldPaddle(paddleIndex);
     }

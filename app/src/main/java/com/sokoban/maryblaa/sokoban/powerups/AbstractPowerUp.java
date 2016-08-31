@@ -49,10 +49,8 @@ public abstract class AbstractPowerUp {
 
     public abstract void performAction();
     public abstract void undoAction();
-    public abstract void performAction(Ball ball);
-    public abstract void undoAction(Ball ball);
 
-    public static AbstractPowerUp spawn(SokobanGame game) {
+    public static AbstractPowerUp spawn(SokobanGame game, Ball ball) {
         int powerupTypeIndex = MathHelper.randomInt(0, PowerupType.values().length - 1);
         PowerupType type = PowerupType.values()[powerupTypeIndex];
 

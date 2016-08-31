@@ -5,29 +5,22 @@ import com.sokoban.maryblaa.sokoban.objects.Ball;
 
 public class SpeedUp extends AbstractPowerUp {
 
-    public SpeedUp(SokobanGame game) {
+    Ball ball;
+
+    public SpeedUp(SokobanGame game, Ball ball) {
         super(game);    // Congratulations
+        this.ball = ball;
     }
 
     private static final float SPEEDUP = 1.5f;
 
     @Override
     public void performAction() {
-
-    }
-
-    @Override
-    public void undoAction() {
-
-    }
-
-    @Override
-    public void performAction(Ball ball) {
         ball.setSpeedVariation(ball.getSpeedVariation() * SPEEDUP);
     }
 
     @Override
-    public void undoAction(Ball ball) {
+    public void undoAction() {
         ball.setSpeedVariation(ball.getSpeedVariation() / SPEEDUP);
     }
 }
