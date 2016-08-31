@@ -5,8 +5,8 @@ import com.sokoban.maryblaa.sokoban.objects.Ball;
 
 public class BallShrinker extends AbstractPowerUp {
 
-    private static final float BALLSIZE = 25f;
     Ball ball;
+    private static final float BALLSIZE = 25f;
 
     public BallShrinker(SokobanGame game, Ball ball) {
         super(game);    // Congratulations
