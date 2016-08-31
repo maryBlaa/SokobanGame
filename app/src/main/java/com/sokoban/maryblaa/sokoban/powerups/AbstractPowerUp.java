@@ -7,6 +7,7 @@ import com.sokoban.maryblaa.sokoban.graphics.Mesh;
 import com.sokoban.maryblaa.sokoban.graphics.Texture;
 import com.sokoban.maryblaa.sokoban.math.Matrix4x4;
 import com.sokoban.maryblaa.sokoban.objects.Ball;
+import com.sokoban.maryblaa.sokoban.objects.Paddle;
 
 public abstract class AbstractPowerUp {
 
