@@ -481,8 +481,6 @@ public class SokobanGame extends Game {
                     } else {
                         // add highscore on correct position with more than 10 highscores
                         JSONArray sortedJsonArray = getSortedJsonArray(scoresArray);
-                        Log.d(TAG, "scoresArray: " + scoresArray);
-                        Log.d(TAG, "sortedJsonArray: " + sortedJsonArray);
 
                         for (int i = 0; i < sortedJsonArray.length(); i++) {
                             JSONObject tmp = sortedJsonArray.getJSONObject(i);
@@ -875,7 +873,6 @@ public class SokobanGame extends Game {
     }
 
     private void drawGameover() {
-        Log.d(TAG, ""+getDeltaTime());
         textGameover.setText("Game Over");
         textP1.setText("" + scoreP1);
         textP2.setText("" + scoreP2);
@@ -988,7 +985,6 @@ public class SokobanGame extends Game {
 
         try {
             JSONObject highscore = JSONSharedPreferences.loadJSONObject(context, "sokoban", "highscore");
-            Log.d(TAG, "JSON " +  highscore.toString());
 
             JSONArray scoresArray = highscore.getJSONArray("highscore");
             scoresArray = getSortedJsonArray(scoresArray);
@@ -1020,8 +1016,6 @@ public class SokobanGame extends Game {
         textCredits4.setText("Thorsten Hack"); //593.0    höhe: 68.0
         renderer.drawText(textCredits4, posCredits4);
 
-        //float[] bounds = textCredits2.getBounds();
-        //Log.d(TAG, "breite: " + bounds[0] + "    höhe: " + bounds[1]);
     }
 
     @Override
