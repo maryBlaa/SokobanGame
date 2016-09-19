@@ -22,10 +22,10 @@ import com.sokoban.maryblaa.sokoban.input.InputEvent;
 import com.sokoban.maryblaa.sokoban.math.Matrix4x4;
 import com.sokoban.maryblaa.sokoban.math.Vector3;
 import com.sokoban.maryblaa.sokoban.objects.Ball;
-import com.sokoban.maryblaa.sokoban.objects.Paddle;
 import com.sokoban.maryblaa.sokoban.powerups.AbstractPowerUp;
 import com.sokoban.maryblaa.sokoban.powerups.Blink;
 import com.sokoban.maryblaa.sokoban.utils.JSONSharedPreferences;
+import com.sokoban.maryblaa.sokoban.utils.Prefs;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -64,7 +64,7 @@ public class SokobanGame extends Game {
     private Mesh meshPaddle;
     private Texture texPaddle;
     private Material materialPaddle;
-    public ArrayList<Paddle> paddles = new ArrayList<>();
+    private Matrix4x4[] worldPaddles;
 
     private SpriteFont fontTitle, fontMenu;
     private TextBuffer textTitle;
@@ -77,7 +77,13 @@ public class SokobanGame extends Game {
     public int screenWidth;
     public int largestWidth;
     private AABB[] aabbMenu;
+    private float paddleTranslationX = 400f;
+    public static float paddleSizeDefault = 200f;
+    public float[] paddleSizes = new float[]{paddleSizeDefault, paddleSizeDefault};
+    public boolean[] paddleInverse = new boolean[]{false, false};
 
+    private float[] paddlePositions = new float[]{0, 0};
+    private float[] paddleFingerPosition = new float[]{0, 0};
     private MediaPlayer bounce1;
     private MediaPlayer bounce2;
     private MediaPlayer bounce3;
@@ -210,9 +216,8 @@ public class SokobanGame extends Game {
         materialBall.setAlphaTestFunction(CompareFunction.GREATER);
         materialBall.setAlphaTestValue(0.9f);
 
-        paddles.add(new Paddle(this, "left"));
-        paddles.add(new Paddle(this, "right"));
         materialPaddle = new Material();
+        calculateWorldPaddles();
 
         bounce1 = MediaPlayer.create(context, R.raw.boing1);
         bounce2 = MediaPlayer.create(context, R.raw.boing2);
@@ -359,7 +364,7 @@ public class SokobanGame extends Game {
         screenWidth = width;
         screenHeight = height;
         largestWidth = screenWidth > screenHeight ? screenWidth : screenHeight;
-        paddles.get(0).setPaddleTranslationX(width / 2 - paddles.get(0).getPaddleSizeDefault() / 5);
+        paddleTranslationX = width / 2 - paddleSizeDefault / 5;
         resetPositions();
     }
 
@@ -437,8 +442,7 @@ public class SokobanGame extends Game {
                 float y = touchPoint.getPosition().getY();
 
                 int index = x < 0 ? 0 : 1;
-                //paddleFingerPosition[index] = y - paddlePositions[index];
-                paddles.get(index).movePaddle(y);
+                paddleFingerPosition[index] = y - paddlePositions[index];
                 break;
             case PAUSED:
                 gameState = GameState.PLAYING;
@@ -585,16 +589,16 @@ public class SokobanGame extends Game {
             return;
         }
 
-        if (Math.abs(paddles.get(index).getPaddleFingerPosition()) < paddles.get(index).getPaddleSize()) {
+        if (Math.abs(paddleFingerPosition[index]) < paddleSizes[index]) {
             float newPaddlePosition;
-            if(paddles.get(index).isPaddleInverse()) {
-                newPaddlePosition = paddles.get(index).movePaddleInversePosition(y);
+            if(paddleInverse[index]) {
+                newPaddlePosition = paddlePositions[index] - y - (paddlePositions[index] + paddleFingerPosition[index]);
             } else {
-                newPaddlePosition = paddles.get(index).movePaddlePosition(y);
+                newPaddlePosition = paddlePositions[index] + y - (paddlePositions[index] + paddleFingerPosition[index]);
             }
-            if (Math.abs(newPaddlePosition) < screenHeight / 2 - paddles.get(index).getPaddleSize()) {
-                paddles.get(index).setPaddlePosition(newPaddlePosition);
-                paddles.get(index).calculateWorldPaddle();
+            if (Math.abs(newPaddlePosition) < screenHeight / 2 - paddleSizes[index]) {
+                paddlePositions[index] = newPaddlePosition;
+                calculateWorldPaddle(index);
             }
         }
     }
@@ -640,9 +644,9 @@ public class SokobanGame extends Game {
 //                    calculateWorldPaddle(1);
 //                }
 //            }
-            if (Math.abs(newPaddlePosition) < screenHeight / 2 - paddles.get(1).getPaddleSize()) {
-                paddles.get(1).setPaddlePosition(newPaddlePosition);
-                paddles.get(1).calculateWorldPaddle();
+            if (Math.abs(newPaddlePosition) < screenHeight / 2 - paddleSizes[1]) {
+                paddlePositions[1] = newPaddlePosition;
+                calculateWorldPaddle(1);
             }
 //            reactionTime = 0;
 //        } else {
@@ -773,12 +777,12 @@ public class SokobanGame extends Game {
 
             for (Ball ball : balls){
                 // Collisiondetection Paddle Ball
-                maxPosition = paddles.get(0).getPaddleTranslationX() - ball.BASE_SIZE;
+                maxPosition = paddleTranslationX - ball.BASE_SIZE;
                 float distance;
-                if (ball.getBallPositionX() > maxPosition + paddles.get(1).getPaddleSize() * 0.2) {
+                if (ball.getBallPositionX() > maxPosition + paddleSizes[1] * 0.2) {
                     // right Paddle
-                    distance = ball.getBallPositionY() - paddles.get(1).getPaddlePosition();
-                    if (Math.abs(distance) > paddles.get(1).getPaddleSize()) {
+                    distance = ball.getBallPositionY() - paddlePositions[1];
+                    if (Math.abs(distance) > paddleSizes[1]) {
                         scoreP1 += 1;
                         scoreTime += (currentDeltaTime / 1000);
                         setMatchpointState();
@@ -787,14 +791,14 @@ public class SokobanGame extends Game {
                         turnAround(distance, false, ball);
                     }
                 } else if (ball.getBallPositionX() > maxPosition) {
-                    distance = ball.getBallPositionY() - paddles.get(1).getPaddlePosition();
-                    if (Math.abs(distance) <= paddles.get(1).getPaddleSize()) {
+                    distance = ball.getBallPositionY() - paddlePositions[1];
+                    if (Math.abs(distance) <= paddleSizes[1]) {
                         turnAround(distance, false, ball);
                     }
-                } else if (ball.getBallPositionX() < -maxPosition - paddles.get(0).getPaddleSize() * 0.2) {
+                } else if (ball.getBallPositionX() < -maxPosition - paddleSizes[0] * 0.2) {
                     // left Paddle
-                    distance = ball.getBallPositionY() - paddles.get(0).getPaddlePosition();
-                    if (Math.abs(distance) > paddles.get(0).getPaddleSize()) {
+                    distance = ball.getBallPositionY() - paddlePositions[0];
+                    if (Math.abs(distance) > paddleSizes[0]) {
                         scoreTime += (currentDeltaTime / 1000);
                         scoreP2 += 1;
                         setMatchpointState();
@@ -804,8 +808,8 @@ public class SokobanGame extends Game {
                     }
                 } else if (ball.getBallPositionX() < -maxPosition) {
 
-                    distance = ball.getBallPositionY() - paddles.get(0).getPaddlePosition();
-                    if (Math.abs(distance) <= paddles.get(0).getPaddleSize()) {
+                    distance = ball.getBallPositionY() - paddlePositions[0];
+                    if (Math.abs(distance) <= paddleSizes[0]) {
                         turnAround(distance, true, ball);
                     }
                 } else {
@@ -843,8 +847,8 @@ public class SokobanGame extends Game {
         }
 
         // draw Paddles
-        for (Paddle paddle : paddles) {
-            renderer.drawMesh(meshPaddle, materialPaddle, paddle.getWorldPaddle());
+        for (Matrix4x4 worldPaddle : worldPaddles) {
+            renderer.drawMesh(meshPaddle, materialPaddle, worldPaddle);
         }
     }
 
@@ -896,7 +900,7 @@ public class SokobanGame extends Game {
         if (!collisionDetectionActive) {
             return;
         }
-        float percentage = distance / paddles.get(isLeft ? 0 : 1).getPaddleSize();
+        float percentage = distance / paddleSizes[isLeft ? 0 : 1];
         float newAngle = percentage * 65;
         if (!isLeft) {
             ball.setBallAngle(270 + newAngle);
@@ -924,21 +928,34 @@ public class SokobanGame extends Game {
     }
 
     private void resetPositions() {
-        paddles.get(0).setPaddlePosition(0);
-        paddles.get(1).setPaddlePosition(0);
-        paddles.get(0).setPaddleFingerPosition(0);
-        paddles.get(1).setPaddleFingerPosition(0);
+        paddlePositions[0] = 0;
+        paddlePositions[1] = 0;
+        paddleFingerPosition[0] = 0;
+        paddleFingerPosition[1] = 0;
         balls.clear();
         balls.add(new Ball(this));
-        maxPosition = paddles.get(0).getPaddleTranslationX() - balls.get(0).BASE_SIZE;
+        maxPosition = paddleTranslationX - balls.get(0).BASE_SIZE;
 
         for (AbstractPowerUp abstractPowerUp : powerupsActive) {
             abstractPowerUp.undoAction();
         }
         powerupsActive.clear();
         visiblePowerup = null;
-        paddles.get(0).calculateWorldPaddles("left");
-        paddles.get(1).calculateWorldPaddles("right");
+        calculateWorldPaddles();
+    }
+
+    public void calculateWorldPaddles() {
+        worldPaddles = new Matrix4x4[]{
+                Matrix4x4.createTranslation(-paddleTranslationX, 0, 0).scale(paddleSizeDefault, paddleSizes[0], paddleSizeDefault),
+                Matrix4x4.createTranslation(paddleTranslationX, 0, 0).scale(paddleSizeDefault, paddleSizes[1], paddleSizeDefault)
+        };
+    }
+
+    public void calculateWorldPaddle(int index) {
+        worldPaddles[index] = Matrix4x4.createTranslation(
+                (index == 0 ? -1 : 1) * paddleTranslationX,
+                paddlePositions[index], 0
+        ).scale(paddleSizeDefault, paddleSizes[index], paddleSizeDefault);
     }
 
     private void drawMenu() {

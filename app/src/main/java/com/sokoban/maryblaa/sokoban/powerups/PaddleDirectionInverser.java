@@ -2,7 +2,6 @@ package com.sokoban.maryblaa.sokoban.powerups;
 
 import com.sokoban.maryblaa.sokoban.SokobanGame;
 import com.sokoban.maryblaa.sokoban.objects.Ball;
-import com.sokoban.maryblaa.sokoban.objects.Paddle;
 
 public class PaddleDirectionInverser extends AbstractPowerUp {
 
@@ -16,12 +15,12 @@ public class PaddleDirectionInverser extends AbstractPowerUp {
     @Override
     public void performAction() {
         paddleIndex = getPaddleIndex(ball);
-        game.paddles.get(paddleIndex).setPaddleInverse(true);
+        game.paddleInverse[paddleIndex] = true;
     }
 
     @Override
     public void undoAction() {
-        game.paddles.get(paddleIndex).setPaddleInverse(false);
+        game.paddleInverse[paddleIndex] = false;
     }
 
 }

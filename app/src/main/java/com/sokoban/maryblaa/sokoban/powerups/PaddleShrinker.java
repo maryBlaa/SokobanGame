@@ -2,7 +2,6 @@ package com.sokoban.maryblaa.sokoban.powerups;
 
 import com.sokoban.maryblaa.sokoban.SokobanGame;
 import com.sokoban.maryblaa.sokoban.objects.Ball;
-import com.sokoban.maryblaa.sokoban.objects.Paddle;
 
 public class PaddleShrinker extends AbstractPowerUp {
 
@@ -17,13 +16,13 @@ public class PaddleShrinker extends AbstractPowerUp {
     @Override
     public void performAction() {
         paddleIndex = getPaddleIndex(ball);
-        game.paddles.get(paddleIndex).setPaddleSize(game.paddles.get(paddleIndex).getPaddleSize() - PADDLESIZE);
-        game.paddles.get(paddleIndex).calculateWorldPaddle();
+        game.paddleSizes[paddleIndex] -= PADDLESIZE;
+        game.calculateWorldPaddle(paddleIndex);
     }
 
     @Override
     public void undoAction() {
-        game.paddles.get(paddleIndex).setPaddleSize(game.paddles.get(paddleIndex).getPaddleSize() + PADDLESIZE);
-        game.paddles.get(paddleIndex).calculateWorldPaddle();
+        game.paddleSizes[paddleIndex] += PADDLESIZE;
+        game.calculateWorldPaddle(paddleIndex);
     }
 }
