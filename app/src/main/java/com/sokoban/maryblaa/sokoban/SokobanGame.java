@@ -23,9 +23,7 @@ import com.sokoban.maryblaa.sokoban.math.Matrix4x4;
 import com.sokoban.maryblaa.sokoban.math.Vector3;
 import com.sokoban.maryblaa.sokoban.objects.Ball;
 import com.sokoban.maryblaa.sokoban.powerups.AbstractPowerUp;
-import com.sokoban.maryblaa.sokoban.powerups.Blink;
 import com.sokoban.maryblaa.sokoban.utils.JSONSharedPreferences;
-import com.sokoban.maryblaa.sokoban.utils.Prefs;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -49,6 +47,8 @@ public class SokobanGame extends Game {
     private static final int MIN_DELAY_UNTIL_POWERUP = 3000;
     private static final int MIN_DELAY_BETWEEN_POWERUPS = 1500;
     private static final int MAX_DELAY_BETWEEN_POWERUPS = 3000;
+    private static final int AI_REACTION_TIME = 300;
+    private static final double AI_MAX_MOVEMENT = 1;
     public int MAX_MATCHPOINTS = 2;
 
     private Camera hudCamera, sceneCamera;
@@ -602,9 +602,9 @@ public class SokobanGame extends Game {
         }
     }
 
-    private void aiPaddleMove() {
+    private int aiReactionStartDeltaTime = 0;
 
-//        long aiReaction = reactionTime + MathHelper.randomInt(300, 500);
+    private void aiPaddleMove() {
 
         // perfect AI
         if (gameState != GameState.PLAYING) {
@@ -623,12 +623,17 @@ public class SokobanGame extends Game {
         }
 
         if(closestBall != null) {
-            float newPaddlePosition = closestBall.getBallPositionY();
+            if(aiReactionStartDeltaTime == 0) {
+                aiReactionStartDeltaTime = currentDeltaTime;
+            } else if(currentDeltaTime - aiReactionStartDeltaTime >= AI_REACTION_TIME) {
+                float newPaddlePosition = closestBall.getBallPositionY();
 
-            if (Math.abs(newPaddlePosition) < screenHeight / 2 - paddleSizes[1]) {
-                paddlePositions[1] = newPaddlePosition;
-                calculateWorldPaddle(1);
+                if (Math.abs(newPaddlePosition) < screenHeight / 2 - paddleSizes[1]) {
+                    calculateWorldAiPaddle(newPaddlePosition);
+                }
             }
+        } else {
+            aiReactionStartDeltaTime = 0;
         }
 
     }
@@ -934,6 +939,23 @@ public class SokobanGame extends Game {
                 Matrix4x4.createTranslation(-paddleTranslationX, 0, 0).scale(paddleSizeDefault, paddleSizes[0], paddleSizeDefault),
                 Matrix4x4.createTranslation(paddleTranslationX, 0, 0).scale(paddleSizeDefault, paddleSizes[1], paddleSizeDefault)
         };
+    }
+
+    public void calculateWorldAiPaddle(float destinationY) {
+        float maxPixelsPerFrame = (float) (largestWidth / (fpms * Ball.BASE_SPEED)
+                * (((double)screenHeight) / largestWidth));
+        maxPixelsPerFrame *= AI_MAX_MOVEMENT;
+
+        float gap = paddlePositions[1] - destinationY;
+        if(gap > maxPixelsPerFrame) {
+            paddlePositions[1] -= maxPixelsPerFrame;
+        } else if(gap < -maxPixelsPerFrame) {
+            paddlePositions[1] += maxPixelsPerFrame;
+        } else {
+            paddlePositions[1] = destinationY;
+        }
+
+        calculateWorldPaddle(1);
     }
 
     public void calculateWorldPaddle(int index) {
