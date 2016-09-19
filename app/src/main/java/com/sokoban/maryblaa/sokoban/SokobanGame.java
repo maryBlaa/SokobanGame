@@ -59,6 +59,7 @@ public class SokobanGame extends Game {
     public Material materialBall;
     public ArrayList<Ball> balls = new ArrayList<>();
     public ArrayList<Ball> toBeDeletedBalls = new ArrayList<>();
+    public ArrayList<Ball> toBeAddedBalls = new ArrayList<>();
 
     //Paddle
     private Mesh meshPaddle;
@@ -612,46 +613,26 @@ public class SokobanGame extends Game {
             return;
         }
 
-        float newPaddlePosition = 0;
-        float biggestXPosition = 0;
-
-        for(Ball ball : balls) {
-
+        Ball closestBall = null;
+        float largestPositionX = -screenWidth;
+        for (Ball ball : balls) {
             if(ball.getBallAngle() > 180) {
-                return;
-            }
-            if(ball.getBallPositionX() > biggestXPosition) {
-                newPaddlePosition = ball.getBallPositionY();
-                biggestXPosition = newPaddlePosition;
-                Log.d(TAG, "" + newPaddlePosition);
-            } else if (biggestXPosition == 0) { // init values
-                Log.d(TAG, "" + biggestXPosition);
-                biggestXPosition = ball.getBallPositionY();
+                continue;
+            } else if(largestPositionX == -screenWidth || ball.getBallPositionX() > largestPositionX) {
+                largestPositionX = ball.getBallPositionX();
+                closestBall = ball;
             }
         }
 
-//        if (true) {
-//            if (ballPositionY >= 0) {
-//                if (Math.abs(newPaddlePosition) < screenHeight / 2 - paddleSizes[1])
-//                for (float i = paddlePositions[1]; i < newPaddlePosition; i+=2) {
-//                    paddlePositions[1] = i;
-//                    calculateWorldPaddle(1);
-//                }
-//            } else {
-//                if (Math.abs(newPaddlePosition) < screenHeight / 2 - paddleSizes[1])
-//                for (float i = paddlePositions[1]; i > newPaddlePosition; i-=2) {
-//                    paddlePositions[1] = i;
-//                    calculateWorldPaddle(1);
-//                }
-//            }
+        if(closestBall != null) {
+            float newPaddlePosition = closestBall.getBallPositionY();
+
             if (Math.abs(newPaddlePosition) < screenHeight / 2 - paddleSizes[1]) {
                 paddlePositions[1] = newPaddlePosition;
                 calculateWorldPaddle(1);
             }
-//            reactionTime = 0;
-//        } else {
-//            return;
-//        }
+        }
+
     }
 
 
@@ -774,6 +755,13 @@ public class SokobanGame extends Game {
             for(Ball ball : toBeDeletedBalls) {
                 balls.remove(ball);
             }
+            toBeDeletedBalls.clear();
+
+            for(Ball ball : toBeAddedBalls) {
+                balls.add(ball);
+            }
+            toBeAddedBalls.clear();
+
 
             for (Ball ball : balls){
                 // Collisiondetection Paddle Ball

@@ -15,7 +15,7 @@ public class DuplicateBall extends AbstractPowerUp {
     public void performAction() {
         ball = new Ball(game);
         ball.setSecondBall(powerUpPositionX, powerUpPositionY);
-        game.balls.add(ball);
+        game.toBeAddedBalls.add(ball);
     }
 
     @Override

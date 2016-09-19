@@ -44,6 +44,7 @@ public class Ball {
         }
         if (game.gameState == SokobanGame.GameState.PLAYING) {
             double speed = speedVariation * (game.largestWidth / (game.fpms * BASE_SPEED));
+
             ballPositionX += speed * Math.sin(Math.toRadians(ballAngle));
             ballPositionY += speed * Math.cos(Math.toRadians(ballAngle));
         }
